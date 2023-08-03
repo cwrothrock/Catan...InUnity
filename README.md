@@ -2,5 +2,5 @@
 Settlers of Catan but in Unity
 ---
 ## Contributors
-Charles Rothrock
+Charles Rothrock  
 Daniel Arn
