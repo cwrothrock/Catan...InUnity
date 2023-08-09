@@ -7,7 +7,6 @@ using UnityEngine.Tilemaps;
 public class CatanManager : MonoBehaviour
 {
     [SerializeField] private Tilemap tilemapResources;
-    [SerializeField] private GameObject placePointPrefab;
 
     // Start is called before the first frame update
     void Start()
@@ -30,7 +29,6 @@ public class CatanManager : MonoBehaviour
                 if (tilemapResources.HasTile(pos)) {
                     Debug.Log(new Vector3(x,y,0));
                     Debug.Log(tilemapResources.GetSprite(pos));
-                    Object.Instantiate(placePointPrefab, tilemapResources.GetCellCenterWorld(pos), Quaternion.identity);
                 }
             }
         }
