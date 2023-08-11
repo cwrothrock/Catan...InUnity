@@ -14517,6 +14517,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f39a833b9200b5842b09b8a70d2e41b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tilemapResources: {fileID: 1573324706}
+  tilemapNumbers: {fileID: 833346087}
   desertTile: {fileID: 11400000, guid: 54c317d3d52fe7848988ffa7d88d7d47, type: 2}
   brickTile: {fileID: 11400000, guid: b78f4e3061114054498bd2a5695b7db6, type: 2}
   oreTile: {fileID: 11400000, guid: 0836d74e58259c54a8d3dddb30d12d4c, type: 2}

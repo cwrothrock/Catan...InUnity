@@ -101,6 +101,7 @@ public class CatanManager : MonoBehaviour
             {
                 for (int y = resourceGrid.cellBounds.yMin; y < resourceGrid.cellBounds.yMax; y++)
                 {
+                    Debug.Log("Creating tile at (" + x + ", " + y + ")");
                     // TODO: I think this only works for small boards. Figure out how to do this for abstract boards.
                     if (x == resourceGrid.cellBounds.xMin && Mathf.Abs(x) == Mathf.Abs(y))
                     {
@@ -122,8 +123,8 @@ public class CatanManager : MonoBehaviour
             foreach (BoardTile boardTile in boardTiles)
             {
                 // TODO: Add board generation logic
-                boardTile.resourceType = (ResourceType)Random.Range(0, 5);
-                boardTile.diceNumber = Random.Range(2, 12);
+                boardTile.resourceType = (ResourceType)Random.Range(0, 6);
+                boardTile.diceNumber = Random.Range(0, 11);
 
                 SetBoardTile(boardTile);
             }
@@ -136,7 +137,39 @@ public class CatanManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        tilemapResources.CompressBounds();
+        tilemapNumbers.CompressBounds();
+
+        resourceTiles = new Tile[] {
+            desertTile,
+            brickTile,
+            oreTile,
+            sheepTile,
+            wheatTile,
+            woodTile,
+        };
+
+        numberTiles = new Tile[] {
+            dice02Tile,
+            dice03Tile,
+            dice04Tile,
+            dice05Tile,
+            dice06Tile,
+            dice07Tile,
+            dice08Tile,
+            dice09Tile,
+            dice10Tile,
+            dice11Tile,
+            dice12Tile,
+        };
+
+        Debug.Log("Generating board...");
+        board = new(tilemapResources, tilemapNumbers);
+        board.GenerateBoard();
+    }
+
     void Update()
     {
 
