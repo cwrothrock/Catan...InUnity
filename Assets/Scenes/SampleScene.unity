@@ -1407,7 +1407,7 @@ GameObject:
   - component: {fileID: 833346086}
   m_Layer: 6
   m_Name: Tilemap Layer 4 - Numbers
-  m_TagString: Untagged
+  m_TagString: NumberTiles
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14235,7 +14235,7 @@ GameObject:
   - component: {fileID: 1573324705}
   m_Layer: 6
   m_Name: Tilemap Layer 3 - Resources
-  m_TagString: Untagged
+  m_TagString: ResourceTiles
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14784,6 +14784,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f39a833b9200b5842b09b8a70d2e41b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  desertTile: {fileID: 11400000, guid: 54c317d3d52fe7848988ffa7d88d7d47, type: 2}
+  brickTile: {fileID: 11400000, guid: b78f4e3061114054498bd2a5695b7db6, type: 2}
+  oreTile: {fileID: 11400000, guid: 0836d74e58259c54a8d3dddb30d12d4c, type: 2}
+  sheepTile: {fileID: 11400000, guid: e9576aab367198f49a29e6c63d17b72a, type: 2}
+  wheatTile: {fileID: 11400000, guid: 5e3df7711f65e54479c0b7bce5f91d25, type: 2}
+  woodTile: {fileID: 11400000, guid: 47cf1bd0c2baaf64dae34b959673411b, type: 2}
 --- !u!1 &2100854055
 GameObject:
   m_ObjectHideFlags: 0
