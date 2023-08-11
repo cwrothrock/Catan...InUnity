@@ -136,39 +136,6 @@ public class CatanManager : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        tilemapResources.CompressBounds();
-        tilemapNumbers.CompressBounds();
-
-        resourceTiles = new Tile[] {
-            desertTile,
-            brickTile,
-            oreTile,
-            sheepTile,
-            wheatTile,
-            woodTile
-        };
-
-        numberTiles = new Tile[] {
-            dice02Tile,
-            dice03Tile,
-            dice04Tile,
-            dice05Tile,
-            dice06Tile,
-            dice07Tile,
-            dice08Tile,
-            dice09Tile,
-            dice10Tile,
-            dice11Tile,
-            dice12Tile
-        };
-
-        board = new(tilemapResources, tilemapNumbers);
-        board.GenerateBoard();
-    }
-
     // Update is called once per frame
     void Update()
     {
