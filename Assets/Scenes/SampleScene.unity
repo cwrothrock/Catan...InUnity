@@ -1369,7 +1369,7 @@ GameObject:
   - component: {fileID: 833346086}
   m_Layer: 6
   m_Name: Tilemap Layer 4 - Numbers
-  m_TagString: Untagged
+  m_TagString: NumberTiles
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14626,8 +14626,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilemapResources: {fileID: 1573324706}
-  settlementPrefab: {fileID: 7177217622334013706, guid: c834078c65ae676409b611aa7ba83d3c, type: 3}
-  settlementsContainer: {fileID: 1736221811}
+  tilemapNumbers: {fileID: 833346087}
+  desertTile: {fileID: 11400000, guid: 54c317d3d52fe7848988ffa7d88d7d47, type: 2}
+  brickTile: {fileID: 11400000, guid: b78f4e3061114054498bd2a5695b7db6, type: 2}
+  oreTile: {fileID: 11400000, guid: 0836d74e58259c54a8d3dddb30d12d4c, type: 2}
+  sheepTile: {fileID: 11400000, guid: e9576aab367198f49a29e6c63d17b72a, type: 2}
+  wheatTile: {fileID: 11400000, guid: 5e3df7711f65e54479c0b7bce5f91d25, type: 2}
+  woodTile: {fileID: 11400000, guid: 47cf1bd0c2baaf64dae34b959673411b, type: 2}
+  dice02Tile: {fileID: 11400000, guid: 2b634199b7714154eba2ee09dfd0de45, type: 2}
+  dice03Tile: {fileID: 11400000, guid: fd91d80613ed75d488c8756a7c6f15a6, type: 2}
+  dice04Tile: {fileID: 11400000, guid: 8d353bcfb3d37a84db99285210d6dc48, type: 2}
+  dice05Tile: {fileID: 11400000, guid: 57c4843a352f97c4abaf6509f3efa7bc, type: 2}
+  dice06Tile: {fileID: 11400000, guid: 499104b1e1848c9499c7132d34d79e48, type: 2}
+  dice07Tile: {fileID: 11400000, guid: e6bf6709d837da54eaca3402a18288ec, type: 2}
+  dice08Tile: {fileID: 11400000, guid: aefc100ca24864c4db263eae98a87803, type: 2}
+  dice09Tile: {fileID: 11400000, guid: 496dac1b9c7667143ada6c893635df7f, type: 2}
+  dice10Tile: {fileID: 11400000, guid: e3082778cbd6dd749bb6ce3ec10afc7c, type: 2}
+  dice11Tile: {fileID: 11400000, guid: 9c5a22255aecd974aac2d77648fb40b5, type: 2}
+  dice12Tile: {fileID: 11400000, guid: 275861c4a73c28843b908cc4fe621ea9, type: 2}
 --- !u!1 &2100854055
 GameObject:
   m_ObjectHideFlags: 0
