@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.EventSystems;
 
 
 public class CatanManager : MonoBehaviour
 {
     [SerializeField] private Tilemap tilemapResources;
     [SerializeField] private GameObject settlementPrefab;
+    [SerializeField] private GameObject settlementsContainer;   
 
     // Start is called before the first frame update
     void Start()
@@ -30,8 +32,15 @@ public class CatanManager : MonoBehaviour
                 if (tilemapResources.HasTile(pos)) {
                     Debug.Log(new Vector3(x,y,0));
                     Debug.Log(tilemapResources.GetSprite(pos));
+                    // Instantiate(settlementPrefab, tilemapResources.CellToWorld(pos), Quaternion.identity, settlementsContainer.transform);
                 }
             }
         }
+    }
+
+    public void DropSettlement(GameObject obj)
+    {
+        Debug.Log("dropping");
+        Instantiate(settlementPrefab, obj.transform.position, Quaternion.identity, settlementsContainer.transform);
     }
 }

@@ -117,7 +117,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Road
+      name: Road_Purple
       rect:
         serializedVersion: 2
         x: 154
@@ -138,11 +138,11 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Settlement
+      name: Settlement_Purple
       rect:
         serializedVersion: 2
-        x: 477
-        y: 187
+        x: 474
+        y: 190
         width: 446
         height: 473
       alignment: 0
@@ -159,7 +159,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: City
+      name: City_Purple
       rect:
         serializedVersion: 2
         x: 1102
@@ -190,9 +190,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      City: 235193730
-      Road: -660613541
-      Settlement: 235193730
+      City_Purple: 235193730
+      Road_Purple: -660613541
+      Settlement_Purple: -660613541
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 1

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6a6af641a66a2754dbd5ecad0db28123
+guid: 28d7d4bf4a1cbd54ebaed37b872d0943
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -117,13 +117,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Road
+      name: Road_Black
       rect:
         serializedVersion: 2
-        x: 156
-        y: 111
-        width: 127
-        height: 627
+        x: 149
+        y: 104
+        width: 142
+        height: 641
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,20 +131,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b61c19ee02fe60243853d56e7f3dcfb4
-      internalID: -1073620361
+      spriteID: b54c4a816149dab4a84ee26b1009d405
+      internalID: -632199438
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Settlement
+      name: Settlement_Black
       rect:
         serializedVersion: 2
-        x: 483
-        y: 189
-        width: 433
-        height: 463
+        x: 477
+        y: 195
+        width: 446
+        height: 466
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -152,20 +152,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9c7fbdd174a578640901f20c67fed3f4
-      internalID: 584804964
+      spriteID: 7dc76001352fb5343a4dd3d7b3276114
+      internalID: -2124748412
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: City
+      name: City_Black
       rect:
         serializedVersion: 2
-        x: 1109
-        y: 177
-        width: 575
-        height: 487
+        x: 1098
+        y: 179
+        width: 586
+        height: 492
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -173,8 +173,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 513c027bd0808804dbebbd8ae22a0f68
-      internalID: -148218445
+      spriteID: fb119573cb5d0244bba64a10fd0e46ab
+      internalID: -1045498425
       vertices: []
       indices: 
       edges: []
@@ -190,9 +190,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      City: -148218445
-      Road: -1073620361
-      Settlement: 584804964
+      Black_2: 793229165
+      Black_4: 2101243046
+      Black_5: 544905731
+      City_Black: -1045498425
+      Road_Black: -632199438
+      Settlement_Black: -2124748412
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 1

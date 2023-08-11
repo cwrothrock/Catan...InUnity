@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 28d7d4bf4a1cbd54ebaed37b872d0943
+guid: 867dc0218e55f7a44a633655e5508bdf
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -117,13 +117,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Road
+      name: Road_MysticBlue
       rect:
         serializedVersion: 2
-        x: 149
-        y: 104
-        width: 142
-        height: 641
+        x: 156
+        y: 111
+        width: 126
+        height: 627
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,20 +131,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b54c4a816149dab4a84ee26b1009d405
-      internalID: -632199438
+      spriteID: 9a67b0fbe8af6714d874a721d5de72fb
+      internalID: -493039625
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Settlement
+      name: Settlement_MysticBlue
       rect:
         serializedVersion: 2
-        x: 477
-        y: 195
-        width: 446
-        height: 466
+        x: 484
+        y: 191
+        width: 435
+        height: 465
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -152,20 +152,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7dc76001352fb5343a4dd3d7b3276114
-      internalID: -2124748412
+      spriteID: b21863b50f83cd34999c3a74b09f413c
+      internalID: -1425908407
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: City
+      name: City_MysticBlue
       rect:
         serializedVersion: 2
-        x: 1098
-        y: 179
-        width: 586
-        height: 492
+        x: 1102
+        y: 173
+        width: 574
+        height: 489
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -173,8 +173,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fb119573cb5d0244bba64a10fd0e46ab
-      internalID: -1045498425
+      spriteID: fb8633a8d5774824b82a6296a94981da
+      internalID: -120704157
       vertices: []
       indices: 
       edges: []
@@ -190,12 +190,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Black_2: 793229165
-      Black_4: 2101243046
-      Black_5: 544905731
-      City: -1045498425
-      Road: -632199438
-      Settlement: -2124748412
+      City_MysticBlue: -120704157
+      Road_MysticBlue: -493039625
+      Settlement_MysticBlue: -1425908407
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 1
