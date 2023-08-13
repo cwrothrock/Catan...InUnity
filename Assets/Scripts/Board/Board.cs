@@ -15,6 +15,7 @@ public class Board : MonoBehaviour
         WHEAT = 5,
         WOOD = 6,
         PORT = 7,
+        LAND = 8,
     }
 
     public enum PortType : int
@@ -80,11 +81,13 @@ public class Board : MonoBehaviour
 
     private void Start()
     {
-        docksTilemap.CompressBounds();
-        landTilemap.CompressBounds();
+        // docksTilemap.CompressBounds();
+        // landTilemap.CompressBounds();
 
         boardVariant = BoardVariant.From(boardVariantJsonAsset);
-        
+        // boardVariant.portPositions = new();
+        // boardVariant.landPositions = new();
+
         GenerateBoard();
     }
 
@@ -94,31 +97,33 @@ public class Board : MonoBehaviour
         List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: true);
         List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: true);
 
-        foreach (Vector3Int pos in docksTilemap.cellBounds.allPositionsWithin)
+        foreach (Vector3Int pos in boardVariant.landPositions)
         {
-            if (docksTilemap.HasTile(pos))
+            landTilemap.SetTile(pos, terrainTilesDict[TileType.LAND]);
+
+            TerrainTile terrainTile = new TerrainTile(pos, terrainOrder[0]);
+            terrainOrder.RemoveAt(0);
+            terrainTilemap.SetTile(pos, terrainTilesDict[terrainTile.tileType]);
+
+            if (!terrainTile.tileType.Equals(TileType.DESERT))
             {
+                terrainTile.diceNumber = diceOrder[0];
+                diceOrder.RemoveAt(0);
+                numbersTilemap.SetTile(pos, numberTilesDict[terrainTile.diceNumber]);
+            }
+
+            boardTiles.Add(terrainTile);
+            // boardVariant.landPositions.Add(pos);
+        }
+
+        foreach (Vector3Int pos in boardVariant.portPositions)
+        {
                 PortTile portTile = new PortTile(pos, portOrder[0]);
                 portOrder.RemoveAt(0);
                 portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
 
                 boardTiles.Add(portTile);
-            }
-            else if (landTilemap.HasTile(pos))
-            {
-                TerrainTile terrainTile = new TerrainTile(pos, terrainOrder[0]);
-                terrainOrder.RemoveAt(0);
-                terrainTilemap.SetTile(pos, terrainTilesDict[terrainTile.tileType]);
-
-                if (!terrainTile.tileType.Equals(TileType.DESERT))
-                {
-                    terrainTile.diceNumber = diceOrder[0];
-                    diceOrder.RemoveAt(0);
-                    numbersTilemap.SetTile(pos, numberTilesDict[terrainTile.diceNumber]);
-                }
-
-                boardTiles.Add(terrainTile);
-            }
+                // boardVariant.portPositions.Add(pos);
         }
     }
 }

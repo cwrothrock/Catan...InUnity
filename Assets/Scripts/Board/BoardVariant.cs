@@ -3,25 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
+using System.IO;
+using UnityEditor;
 
 [Serializable]
 public class BoardVariant
 {
+    public const string VARIANTS_DIR = "Assets/BoardVariants/";
+
     public Dictionary<int, int> diceCounts;
     public Dictionary<Board.PortType, int> portCounts;
     public Dictionary<Board.TileType, int> terrainCounts;
     public Dictionary<Board.TileType, int> cardCounts;
     public Dictionary<string, int> devCounts;
     public Dictionary<string, int> buildingCounts;
+    public List<Vector3Int> landPositions;
+    public List<Vector3Int> portPositions;
 
-    public static BoardVariant From(string json)
+    public static BoardVariant From(string name)
     {
-        return JsonConvert.DeserializeObject<BoardVariant>(json);
+        if (!name.StartsWith(VARIANTS_DIR)) name = string.Concat(VARIANTS_DIR, name);
+        if (!name.EndsWith(".json")) name = string.Concat(name, ".json");
+        return JsonConvert.DeserializeObject<BoardVariant>(File.ReadAllText(name));
     }
 
     public static BoardVariant From(TextAsset textAsset)
     {
-        return From(textAsset.text);
+        return JsonConvert.DeserializeObject<BoardVariant>(textAsset.text);
+    }
+
+    public static void ToJSON(BoardVariant variant, string name)
+    {
+        if (!name.EndsWith(".json")) name = string.Concat(name, ".json");
+        File.WriteAllText(string.Concat(VARIANTS_DIR, name), JsonConvert.SerializeObject(variant, Formatting.Indented));
+        AssetDatabase.Refresh();
     }
 
     public static List<T> Explode<T>(Dictionary<T,int> dict, bool shuffle = false)
