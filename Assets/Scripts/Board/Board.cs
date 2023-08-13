@@ -80,6 +80,7 @@ public class Board : MonoBehaviour
 
     private void Start()
     {
+        docksTilemap.CompressBounds();
         landTilemap.CompressBounds();
 
         boardVariant = BoardVariant.From(boardVariantJsonAsset);
@@ -93,9 +94,17 @@ public class Board : MonoBehaviour
         List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: true);
         List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: true);
 
-        foreach (Vector3Int pos in landTilemap.cellBounds.allPositionsWithin)
+        foreach (Vector3Int pos in docksTilemap.cellBounds.allPositionsWithin)
         {
-            if (landTilemap.HasTile(pos))
+            if (docksTilemap.HasTile(pos))
+            {
+                PortTile portTile = new PortTile(pos, portOrder[0]);
+                portOrder.RemoveAt(0);
+                portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
+
+                boardTiles.Add(portTile);
+            }
+            else if (landTilemap.HasTile(pos))
             {
                 TerrainTile terrainTile = new TerrainTile(pos, terrainOrder[0]);
                 terrainOrder.RemoveAt(0);
@@ -106,8 +115,6 @@ public class Board : MonoBehaviour
                     terrainTile.diceNumber = diceOrder[0];
                     diceOrder.RemoveAt(0);
                     numbersTilemap.SetTile(pos, numberTilesDict[terrainTile.diceNumber]);
-                } else {
-                    Debug.Log("DESERT!!");
                 }
 
                 boardTiles.Add(terrainTile);
