@@ -21,7 +21,7 @@ public class BoardVariant
 
     public static BoardVariant From(TextAsset textAsset)
     {
-        return JsonConvert.DeserializeObject<BoardVariant>(textAsset.text);
+        return From(textAsset.text);
     }
 
     public static List<T> Explode<T>(Dictionary<T,int> dict, bool shuffle = false)
