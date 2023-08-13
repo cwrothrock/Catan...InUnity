@@ -56,7 +56,7 @@ public class Board : MonoBehaviour
     public class TerrainTile : BoardTile
     {
         public int diceNumber;
-        public TerrainTile(Vector3Int position, TileType tileType, int diceNumber)
+        public TerrainTile(Vector3Int position, TileType tileType, int diceNumber = 0)
         : base(position, tileType)
         {
             this.diceNumber = diceNumber;
@@ -97,18 +97,18 @@ public class Board : MonoBehaviour
         {
             if (landTilemap.HasTile(pos))
             {
-                TerrainTile terrainTile = new TerrainTile(pos, terrainOrder[0], diceOrder[0]);
+                TerrainTile terrainTile = new TerrainTile(pos, terrainOrder[0]);
                 terrainOrder.RemoveAt(0);
-                if (terrainTile.tileType.Equals(TileType.DESERT))
-                {
-                    terrainTile.diceNumber = 7;
-                }
-                else 
-                {
-                    numbersTilemap.SetTile(pos, numberTilesDict[terrainTile.diceNumber]);
-                    diceOrder.RemoveAt(0);
-                }
                 terrainTilemap.SetTile(pos, terrainTilesDict[terrainTile.tileType]);
+
+                if (!terrainTile.tileType.Equals(TileType.DESERT))
+                {
+                    terrainTile.diceNumber = diceOrder[0];
+                    diceOrder.RemoveAt(0);
+                    numbersTilemap.SetTile(pos, numberTilesDict[terrainTile.diceNumber]);
+                } else {
+                    Debug.Log("DESERT!!");
+                }
 
                 boardTiles.Add(terrainTile);
             }
