@@ -1,18 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static InputManager Instance { get; private set; }
+
+    private InputActions inputActions;
+
+    public event EventHandler OnClickAction;
+
+    private void Awake()
     {
-        
+        Instance = this;
+
+        inputActions = new InputActions();
+        inputActions.Enable();
+
+        inputActions.Player.Click.performed += Click_performed;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy()
     {
-        
+        inputActions.Player.Click.performed -= Click_performed;
+    }
+
+    private void Click_performed(InputAction.CallbackContext obj)
+    {
+        OnClickAction?.Invoke(this, EventArgs.Empty);
     }
 }

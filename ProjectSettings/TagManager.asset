@@ -14,7 +14,7 @@ TagManager:
   - Water
   - UI
   - Tilemap
-  - PlacePoints
+  - 
   - 
   - 
   - 
@@ -42,7 +42,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: PlacePoints
-    uniqueID: 2221883711
     locked: 0
