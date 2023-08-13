@@ -98,8 +98,11 @@ public class Board : MonoBehaviour
         {
             if (docksTilemap.HasTile(pos))
             {
-                portsTilemap.SetTile(pos, portTilesDict[portOrder[0]]);
+                PortTile portTile = new PortTile(pos, portOrder[0]);
                 portOrder.RemoveAt(0);
+                portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
+
+                boardTiles.Add(portTile);
             }
             else if (landTilemap.HasTile(pos))
             {
