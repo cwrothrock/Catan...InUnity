@@ -1,0 +1,49 @@
+{
+  "diceCounts": {
+    "2": 1,
+    "3": 2,
+    "4": 2,
+    "5": 2,
+    "6": 2,
+    "8": 2,
+    "9": 2,
+    "10": 2,
+    "11": 2,
+    "12": 1
+  },
+  "portCounts": {
+    "ANY3": 4,
+    "SHEEP": 1,
+    "WHEAT": 1,
+    "BRICK": 1,
+    "ORE": 1,
+    "WOOD": 1
+  },
+  "terrainCounts": {
+    "SHEEP": 4,
+    "WHEAT": 4,
+    "WOOD": 4,
+    "BRICK": 3,
+    "ORE": 3,
+    "DESERT": 1
+  },
+  "cardCounts": {
+    "BRICK": 19,
+    "ORE": 19,
+    "SHEEP": 19,
+    "WHEAT": 19,
+    "WOOD": 19
+  },
+  "devCounts": {
+    "KNIGHT": 14,
+    "MONOPOLY": 2,
+    "ROAD_BUILDER": 2,
+    "YEAR_OF_PLENTY": 2,
+    "VICTORY_POINT": 5
+  },
+  "buildingCounts": {
+    "ROAD": 15,
+    "SETTLEMENT": 5,
+    "CITY": 4
+  }
+}
