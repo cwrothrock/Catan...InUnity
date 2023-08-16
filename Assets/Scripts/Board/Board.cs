@@ -79,6 +79,39 @@ public class Board : MonoBehaviour
 
     private List<BoardTile> boardTiles = new List<BoardTile>();
 
+    // Graph
+    private class Node { }
+
+    private class VertexNode : Node
+    {
+        private EdgeNode[] edgeNodes;
+
+        public VertexNode() { }
+    }
+
+    private class EdgeNode : Node
+    {
+        private VertexNode[] vertexNodes;
+
+        public EdgeNode() { }
+    }
+
+    private class TileNode : Node
+    {
+        private VertexNode[] vertexNodes;
+
+        public TileNode() { }
+    }
+
+    private class BoardGraph
+    {
+        private VertexNode[] vertexNodes;
+        private EdgeNode[] edgeNodes;
+        private TileNode[] tileNodes;
+
+        private BoardGraph() { }
+    }
+
     private void Start()
     {
         // docksTilemap.CompressBounds();
@@ -118,12 +151,12 @@ public class Board : MonoBehaviour
 
         foreach (Vector3Int pos in boardVariant.portPositions)
         {
-                PortTile portTile = new PortTile(pos, portOrder[0]);
-                portOrder.RemoveAt(0);
-                portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
+            PortTile portTile = new PortTile(pos, portOrder[0]);
+            portOrder.RemoveAt(0);
+            portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
 
-                boardTiles.Add(portTile);
-                // boardVariant.portPositions.Add(pos);
+            boardTiles.Add(portTile);
+            // boardVariant.portPositions.Add(pos);
         }
     }
 }
