@@ -110,7 +110,10 @@ public class Board : MonoBehaviour
         private TileNode[] tileNodes;
 
         private BoardGraph() { }
+
+
     }
+
 
     private void Start()
     {
