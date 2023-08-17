@@ -79,7 +79,7 @@ public class Board : MonoBehaviour
 
     private List<BoardTile> boardTiles = new List<BoardTile>();
 
-    // Graph Classes
+    // Graph
     private class Node { }
 
     private class VertexNode : Node
@@ -103,7 +103,10 @@ public class Board : MonoBehaviour
         public TileNode() { }
     }
 
-    // end Graph Classes
+    private VertexNode[] vertexNodes;
+    private EdgeNode[] edgeNodes;
+    private TileNode[] tileNodes;
+    // end Graph
 
     private void Start()
     {
