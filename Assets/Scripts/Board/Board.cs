@@ -79,34 +79,7 @@ public class Board : MonoBehaviour
 
     private List<BoardTile> boardTiles = new List<BoardTile>();
 
-    // Graph
-    private class Node { }
-
-    private class VertexNode : Node
-    {
-        private EdgeNode[] edgeNodes;
-
-        public VertexNode() { }
-    }
-
-    private class EdgeNode : Node
-    {
-        private VertexNode[] vertexNodes;
-
-        public EdgeNode() { }
-    }
-
-    private class TileNode : Node
-    {
-        private VertexNode[] vertexNodes;
-
-        public TileNode() { }
-    }
-
-    private VertexNode[] vertexNodes;
-    private EdgeNode[] edgeNodes;
-    private TileNode[] tileNodes;
-    // end Graph
+    private Graph graph;
 
     private void Start()
     {
