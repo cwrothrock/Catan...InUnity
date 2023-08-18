@@ -79,6 +79,8 @@ public class Board : MonoBehaviour
 
     private List<BoardTile> boardTiles = new List<BoardTile>();
 
+    private Graph graph;
+
     private void Start()
     {
         // docksTilemap.CompressBounds();
@@ -118,12 +120,12 @@ public class Board : MonoBehaviour
 
         foreach (Vector3Int pos in boardVariant.portPositions)
         {
-                PortTile portTile = new PortTile(pos, portOrder[0]);
-                portOrder.RemoveAt(0);
-                portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
+            PortTile portTile = new PortTile(pos, portOrder[0]);
+            portOrder.RemoveAt(0);
+            portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
 
-                boardTiles.Add(portTile);
-                // boardVariant.portPositions.Add(pos);
+            boardTiles.Add(portTile);
+            // boardVariant.portPositions.Add(pos);
         }
     }
 }
