@@ -81,6 +81,31 @@ public class Board : MonoBehaviour
 
     private Graph graph;
 
+    // Determine if two tile locations are neighbors ona tilemap
+    private bool isNeighbor(Vector3Int v, Vector3Int w)
+    {
+        // Return false if either x or y difference is greater than 1 (i.e. more than one tile away)
+        if (Mathf.Abs(v.x - w.x) > 1 || Mathf.Abs(v.y - w.y) > 1)
+        {
+            return false;
+        }
+        // x value difference is either 0 or 1. If y values are the same, they are on the same row, and therefore neighbors
+        if (v.y == w.y)
+        {
+            return true;
+        }
+        if (v.y % 2 == 0)
+        {
+            // v is in even row
+            return w.x <= v.x;
+        }
+        else
+        {
+            // v is in odd row
+            return w.x >= v.x;
+        }
+    }
+
     private void Start()
     {
         // docksTilemap.CompressBounds();
