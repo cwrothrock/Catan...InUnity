@@ -104,7 +104,6 @@ public class Board : MonoBehaviour
         }
     }
 
-    # region Inspector Elements
     [SerializeField] private Tilemap landTilemap;
     [SerializeField] private Tilemap terrainTilemap;
     [SerializeField] private Tilemap docksTilemap;
@@ -117,8 +116,7 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<bool, string> boardRulesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
-    # endregion
-
+    
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -239,6 +237,41 @@ public class Board : MonoBehaviour
         {
             // v is in odd row
             return w.x >= v.x;
+        }
+    }
+
+    // Return list of neighboring tile locations
+    private List<Vector3Int> GetNeighbors(Vector3Int v)
+    {
+        if (v.y % 2 == 0)
+        {
+            // v is in an even row
+            return new List<Vector3Int> {
+                // Row above
+                new Vector3Int(v.x - 1, v.y + 1, v.z),
+                new Vector3Int(v.x, v.y + 1, v.z),
+                // Same row
+                new Vector3Int(v.x - 1, v.y, v.z),
+                new Vector3Int(v.x + 1, v.y, v.z),
+                // Row below
+                new Vector3Int(v.x - 1, v.y - 1, v.z),
+                new Vector3Int(v.x, v.y - 1, v.z),
+            };
+        }
+        else
+        {
+            // v is in an odd row
+            return new List<Vector3Int> {
+                // Row above
+                new Vector3Int(v.x, v.y + 1, v.z),
+                new Vector3Int(v.x + 1, v.y + 1, v.z),
+                // Same row
+                new Vector3Int(v.x - 1, v.y, v.z),
+                new Vector3Int(v.x + 1, v.y, v.z),
+                // Row below
+                new Vector3Int(v.x, v.y - 1, v.z),
+                new Vector3Int(v.x + 1, v.y - 1, v.z),
+            };
         }
     }
 
