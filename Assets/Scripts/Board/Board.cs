@@ -28,7 +28,7 @@ public class Board : MonoBehaviour
             bool valid = true;
             board.GetDiceTiles().Keys.ToList().ForEach(diceRoll => {
                 List<Vector3Int> positions = board.GetDiceTiles()[diceRoll].Select(tile => tile.position).ToList();
-                valid &= ContainsNeighbors(positions);
+                valid &= !ContainsNeighbors(positions);
             });
             return valid;
         }
@@ -123,8 +123,8 @@ public class Board : MonoBehaviour
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
     private List<PortTile> portTiles;
-    private Graph graph;
     private Dictionary<int, List<TerrainTile>> diceTiles;
+    private Graph graph;
 
     private void Start()
     {
@@ -153,10 +153,13 @@ public class Board : MonoBehaviour
         List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: false);
         List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: false);
 
+        int attempts = 0;
         do {
+            attempts++;
             terrainTiles.Clear();
             portTiles.Clear();
             diceTiles.Clear();
+            diceOrder.RemoveAll(dice => dice == 7);
 
             BoardVariant.Shuffle(diceOrder);
             BoardVariant.Shuffle(terrainOrder);
@@ -179,9 +182,8 @@ public class Board : MonoBehaviour
             {
                 AddPortTile(boardVariant.portPositions[i], portOrder[i]);
             }
-        } while (false);
-        // TODO: change this to while(!Validate(this))
-        Validate(this);
+        } while (!Validate(this));
+        Debug.Log("Generated valid board in " + attempts + " attempts!");
     }
 
     private void AddTerrainTile(Vector3Int position, TileType type, int diceNumber)
