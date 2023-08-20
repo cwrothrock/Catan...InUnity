@@ -4,9 +4,47 @@ using AYellowpaper.SerializedCollections;
 using System.Collections.Generic;
 using UnityEditor;
 using System.Linq;
+using Unity.Netcode;
+using System;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.VisualScripting;
+using UnityEngine.UIElements;
 
 public class Board : MonoBehaviour
 {
+    public abstract class BoardRule
+    {
+        public virtual bool Validate(Board board)
+        {
+            // Board configuration is valid
+            return true;
+        }
+    }
+
+    public class AdjacentNumbersRule : BoardRule
+    {
+        public override bool Validate(Board board)
+        {
+            bool valid = true;
+            board.GetDiceTiles().Keys.ToList().ForEach(diceRoll => {
+                List<Vector3Int> positions = board.GetDiceTiles()[diceRoll].Select(tile => tile.position).ToList();
+                valid &= ContainsNeighbors(positions);
+            });
+            return valid;
+        }
+    }
+
+    public class Adjacent68Rule : BoardRule
+    {
+        public override bool Validate(Board board)
+        {
+            List<Vector3Int> positions = new();
+            positions.Concat(board.GetDiceTiles()[6].Select(tile => tile.position).ToList());
+            positions.Concat(board.GetDiceTiles()[8].Select(tile => tile.position).ToList());
+            return !ContainsNeighbors(positions);
+        }
+    }
+
     public enum TileType : int
     {
         WATER = 0,
@@ -66,6 +104,7 @@ public class Board : MonoBehaviour
         }
     }
 
+    # region Inspector Elements
     [SerializeField] private Tilemap landTilemap;
     [SerializeField] private Tilemap terrainTilemap;
     [SerializeField] private Tilemap docksTilemap;
@@ -75,17 +114,109 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<TileType, Tile> terrainTilesDict;
     [SerializeField] private SerializedDictionary<PortType, Tile> portTilesDict;
     [SerializeField] private SerializedDictionary<int, Tile> numberTilesDict;
+    [SerializeField] private SerializedDictionary<bool, string> boardRulesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
+    # endregion
+
     private BoardVariant boardVariant;
-
-    private List<TerrainTile> terrainTiles = new List<TerrainTile>();
-    private List<PortTile> portTiles = new List<PortTile>();
-
+    private List<BoardRule> boardRules;
+    private List<TerrainTile> terrainTiles;
+    private List<PortTile> portTiles;
     private Graph graph;
+    private Dictionary<int, List<TerrainTile>> diceTiles;
+
+    private void Start()
+    {
+        boardVariant = BoardVariant.From(boardVariantJsonAsset);
+        
+        boardRules = new List<BoardRule>
+        {
+            new AdjacentNumbersRule(),
+            new Adjacent68Rule()
+        };
+
+        terrainTiles = new List<TerrainTile>();
+        portTiles = new List<PortTile>();
+        diceTiles = new Dictionary<int, List<TerrainTile>>();
+
+        graph = new Graph();
+
+        GenerateBoard(boardVariant, boardRules);
+        UpdateBoardUI();
+    }
+
+    private void GenerateBoard(BoardVariant boardVariant, List<BoardRule> boardRules)
+    {
+
+        List<TileType> terrainOrder = BoardVariant.Explode(boardVariant.terrainCounts, shuffle: false);
+        List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: false);
+        List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: false);
+
+        do {
+            terrainTiles.Clear();
+            portTiles.Clear();
+            diceTiles.Clear();
+
+            BoardVariant.Shuffle(diceOrder);
+            BoardVariant.Shuffle(terrainOrder);
+            BoardVariant.Shuffle(portOrder);
+
+            // Add DESERT 7 rolls to maintain alignment
+            List<int> desertIndices = Enumerable.Range(0, terrainOrder.Count).Where(i => terrainOrder[i].Equals(TileType.DESERT)).ToList();
+            desertIndices.ForEach(index => {
+                diceOrder.Insert(index, 7);
+            });
+
+            // Add terrain tiles with dice rolls
+            for (int i = 0; i < terrainOrder.Count; i++)
+            {
+                AddTerrainTile(boardVariant.landPositions[i], terrainOrder[i], diceOrder[i]);
+            }
+
+            // Add port tiles
+            for (int i = 0; i < boardVariant.portPositions.Count; i++)
+            {
+                AddPortTile(boardVariant.portPositions[i], portOrder[i]);
+            }
+        } while (false);
+        // TODO: change this to while(!Validate(this))
+        Validate(this);
+    }
+
+    private void AddTerrainTile(Vector3Int position, TileType type, int diceNumber)
+    {
+        terrainTiles.Add(new TerrainTile(position, type, diceNumber));
+        if (!diceTiles.ContainsKey(diceNumber)) {
+            diceTiles.Add(diceNumber, new List<TerrainTile>());
+        }
+        diceTiles[diceNumber].Add(terrainTiles.Last());
+    }
+
+    public void AddPortTile(Vector3Int position, PortType type)
+    {
+        portTiles.Add(new PortTile(position, type));
+    }
+
+    private void UpdateBoardUI()
+    {
+        foreach (TerrainTile tile in terrainTiles)
+        {
+            landTilemap.SetTile(tile.position, terrainTilesDict[TileType.LAND]);
+            terrainTilemap.SetTile(tile.position, terrainTilesDict[tile.tileType]);
+            if (!tile.tileType.Equals(TileType.DESERT))
+            {
+                numbersTilemap.SetTile(tile.position, numberTilesDict[tile.diceNumber]);
+            }
+        }
+        foreach (PortTile tile in portTiles)
+        {
+            portsTilemap.SetTile(tile.position, portTilesDict[tile.portType]);
+        }
+    }
 
     // Determine if two tile locations are neighbors ona tilemap
-    private bool isNeighbor(Vector3Int v, Vector3Int w)
+    public static bool IsNeighbor(Vector3Int v, Vector3Int w)
     {
         // Return false if either x or y difference is greater than 1 (i.e. more than one tile away)
         if (Mathf.Abs(v.x - w.x) > 1 || Mathf.Abs(v.y - w.y) > 1)
@@ -109,106 +240,32 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void Start()
+    public static bool ContainsNeighbors(List<Vector3Int> list)
     {
-        boardVariant = BoardVariant.From(boardVariantJsonAsset);
-        // boardVariant.portPositions = new();
-        // boardVariant.landPositions = new();
-
-        GenerateBoard();
-        UpdateBoardUI();
-    }
-
-    private void GenerateBoard()
-    {
-        List<TileType> terrainOrder = BoardVariant.Explode(boardVariant.terrainCounts, shuffle: false);
-        List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: false);
-
-        // Place 6/8s first
-        int sixes = diceOrder.RemoveAll(x => x == 6);
-        int eights = diceOrder.RemoveAll(x => x == 8);
-        int count = sixes + eights;
-        List<Vector3Int> candidatePositions;
-        do {
-            BoardVariant.Shuffle(boardVariant.landPositions);
-            candidatePositions = boardVariant.landPositions.Take(count).ToList();
-        } while (HasNeighbors(candidatePositions));
-        
-        List<int> diceTemp = Enumerable.Repeat(6, sixes).ToList();
-        diceTemp.AddRange(Enumerable.Repeat(8, eights));
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < list.Count; i++)
         {
-            if (terrainOrder[i].Equals(TileType.DESERT))
+            for (int j = i+1; j < list.Count; j++)
             {
-                AddTerrainTile(candidatePositions[i], terrainOrder[i], 7);
-            } else 
-            {
-                AddTerrainTile(candidatePositions[i], terrainOrder[i], diceTemp[i]);
-                diceOrder.RemoveAt(0);
-            }
-        }
-
-        // Place remaining numbers
-        for (int i = count; i < terrainOrder.Count; i++)
-        {
-            if (terrainOrder[i].Equals(TileType.DESERT))
-            {
-                AddTerrainTile(boardVariant.landPositions[i], terrainOrder[i], 7);
-            } else 
-            {
-                AddTerrainTile(boardVariant.landPositions[i], terrainOrder[i], diceOrder[0]);
-                diceOrder.RemoveAt(0);
-            }
-        }
-
-        // Place ports
-        List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: true);
-        foreach (Vector3Int pos in boardVariant.portPositions)
-        {
-            AddPortTile(pos, portOrder[0]);
-            portOrder.RemoveAt(0);
-        }
-    }
-
-    private bool HasNeighbors(List<Vector3Int> positions)
-    {
-        for (int i = 0; i < positions.Count; i++)
-        {
-            for (int j = i+1; j < positions.Count; j++)
-            {
-                // if (IsNeighbor(positions[i], positions[j]))
-                // {
-                //     return true;
-                // }
+                if (IsNeighbor(list[i], list[j])) 
+                {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    private void AddTerrainTile(Vector3Int position, TileType type, int diceNumber)
-    {
-        terrainTiles.Add(new TerrainTile(position, type, diceNumber));
-    }
+    public List<TerrainTile> GetTerrainTiles() => terrainTiles;
+    public List<PortTile> GetPortTiles() => portTiles;
+    public List<BoardRule> GetBoardRules() => boardRules;
+    public Dictionary<int, List<TerrainTile>> GetDiceTiles() => diceTiles;
 
-    public void AddPortTile(Vector3Int position, PortType type)
+    public static bool Validate(Board board)
     {
-        portTiles.Add(new PortTile(position, type));
-    }
-
-    private void UpdateBoardUI()
-    {
-        foreach (TerrainTile tile in terrainTiles)
-        {
-            landTilemap.SetTile(tile.position, terrainTilesDict[TileType.LAND]);
-            terrainTilemap.SetTile(tile.position, terrainTilesDict[tile.tileType]);
-            if (!tile.tileType.Equals(TileType.DESERT))
-            {
-                numbersTilemap.SetTile(tile.position, numberTilesDict[tile.diceNumber]);
-            }
-        }
-        foreach (PortTile tile in portTiles)
-        {
-            portsTilemap.SetTile(tile.position, portTilesDict[tile.portType]);
-        }
+        bool result = true;
+        board.GetBoardRules().ForEach(rule => {
+            result &= rule.Validate(board);
+        });
+        return result;
     }
 }

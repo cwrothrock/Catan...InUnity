@@ -442,6 +442,8 @@ MonoBehaviour:
       Value: {fileID: 11400000, guid: 275861c4a73c28843b908cc4fe621ea9, type: 2}
     - Key: 0
       Value: {fileID: 0}
+  boardRulesDict:
+    _serializedList: []
   boardVariantJsonAsset: {fileID: 4900000, guid: 6668da2868cbdea4986981ac2f369afe, type: 3}
 --- !u!1 &435197434
 GameObject:
