@@ -26,10 +26,12 @@ public class Board : MonoBehaviour
         public override bool Validate(Board board)
         {
             bool valid = true;
-            board.GetDiceTiles().Keys.ToList().ForEach(diceRoll => {
+            board.GetDiceTiles().Keys.ToList().ForEach(diceRoll =>
+            {
                 List<Vector3Int> positions = board.GetDiceTiles()[diceRoll].Select(tile => tile.position).ToList();
                 valid &= !ContainsNeighbors(positions);
             });
+            // Debug.Log("Adjacent Numbers Rule: " + valid);
             return valid;
         }
     }
@@ -39,8 +41,9 @@ public class Board : MonoBehaviour
         public override bool Validate(Board board)
         {
             List<Vector3Int> positions = new();
-            positions.Concat(board.GetDiceTiles()[6].Select(tile => tile.position).ToList());
-            positions.Concat(board.GetDiceTiles()[8].Select(tile => tile.position).ToList());
+            positions.AddRange(board.GetDiceTiles()[6].Select(tile => tile.position).ToList());
+            positions.AddRange(board.GetDiceTiles()[8].Select(tile => tile.position).ToList());
+            // Debug.Log("Adjacent 6/8 Rule: " + !ContainsNeighbors(positions));
             return !ContainsNeighbors(positions);
         }
     }
@@ -116,7 +119,7 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<bool, string> boardRulesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
-    
+
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -127,7 +130,7 @@ public class Board : MonoBehaviour
     private void Start()
     {
         boardVariant = BoardVariant.From(boardVariantJsonAsset);
-        
+
         boardRules = new List<BoardRule>
         {
             new AdjacentNumbersRule(),
@@ -152,7 +155,8 @@ public class Board : MonoBehaviour
         List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: false);
 
         int attempts = 0;
-        do {
+        do
+        {
             attempts++;
             terrainTiles.Clear();
             portTiles.Clear();
@@ -165,7 +169,8 @@ public class Board : MonoBehaviour
 
             // Add DESERT 7 rolls to maintain alignment
             List<int> desertIndices = Enumerable.Range(0, terrainOrder.Count).Where(i => terrainOrder[i].Equals(TileType.DESERT)).ToList();
-            desertIndices.ForEach(index => {
+            desertIndices.ForEach(index =>
+            {
                 diceOrder.Insert(index, 7);
             });
 
@@ -187,7 +192,8 @@ public class Board : MonoBehaviour
     private void AddTerrainTile(Vector3Int position, TileType type, int diceNumber)
     {
         terrainTiles.Add(new TerrainTile(position, type, diceNumber));
-        if (!diceTiles.ContainsKey(diceNumber)) {
+        if (!diceTiles.ContainsKey(diceNumber))
+        {
             diceTiles.Add(diceNumber, new List<TerrainTile>());
         }
         diceTiles[diceNumber].Add(terrainTiles.Last());
@@ -279,9 +285,9 @@ public class Board : MonoBehaviour
     {
         for (int i = 0; i < list.Count; i++)
         {
-            for (int j = i+1; j < list.Count; j++)
+            for (int j = i + 1; j < list.Count; j++)
             {
-                if (IsNeighbor(list[i], list[j])) 
+                if (IsNeighbor(list[i], list[j]))
                 {
                     return true;
                 }
@@ -298,7 +304,8 @@ public class Board : MonoBehaviour
     public static bool Validate(Board board)
     {
         bool result = true;
-        board.GetBoardRules().ForEach(rule => {
+        board.GetBoardRules().ForEach(rule =>
+        {
             result &= rule.Validate(board);
         });
         return result;
