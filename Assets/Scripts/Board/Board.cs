@@ -113,24 +113,30 @@ public class Board : MonoBehaviour
         {
             // v is in an even row
             return new List<Vector3Int> {
+                // Row above
+                new Vector3Int(v.x - 1, v.y + 1, v.z),
                 new Vector3Int(v.x, v.y + 1, v.z),
-                new Vector3Int(v.x + 1, v.y, v.z),
-                new Vector3Int(v.x, v.y - 1, v.z),
-                new Vector3Int(v.x - 1, v.y - 1, v.z),
+                // Same row
                 new Vector3Int(v.x - 1, v.y, v.z),
-                new Vector3Int(v.x - 1, v.y + 1, v.z)
+                new Vector3Int(v.x + 1, v.y, v.z),
+                // Row below
+                new Vector3Int(v.x - 1, v.y - 1, v.z),
+                new Vector3Int(v.x, v.y - 1, v.z),
             };
         }
         else
         {
             // v is in an odd row
             return new List<Vector3Int> {
+                // Row above
+                new Vector3Int(v.x, v.y + 1, v.z),
                 new Vector3Int(v.x + 1, v.y + 1, v.z),
-                new Vector3Int(v.x + 1, v.y, v.z),
-                new Vector3Int(v.x + 1, v.y - 1, v.z),
-                new Vector3Int(v.x, v.y - 1, v.z),
+                // Same row
                 new Vector3Int(v.x - 1, v.y, v.z),
-                new Vector3Int(v.x, v.y + 1, v.z)
+                new Vector3Int(v.x + 1, v.y, v.z),
+                // Row below
+                new Vector3Int(v.x, v.y - 1, v.z),
+                new Vector3Int(v.x + 1, v.y - 1, v.z),
             };
         }
     }
