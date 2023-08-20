@@ -82,7 +82,7 @@ public class Board : MonoBehaviour
     private Graph graph;
 
     // Determine if two tile locations are neighbors ona tilemap
-    private bool isNeighbor(Vector3Int v, Vector3Int w)
+    private bool IsNeighbor(Vector3Int v, Vector3Int w)
     {
         // Return false if either x or y difference is greater than 1 (i.e. more than one tile away)
         if (Mathf.Abs(v.x - w.x) > 1 || Mathf.Abs(v.y - w.y) > 1)
@@ -103,6 +103,35 @@ public class Board : MonoBehaviour
         {
             // v is in odd row
             return w.x >= v.x;
+        }
+    }
+
+    // Return list of neighboring tile locations
+    private List<Vector3Int> GetNeighbors(Vector3Int v)
+    {
+        if (v.y % 2 == 0)
+        {
+            // v is in an even row
+            return new List<Vector3Int> {
+                new Vector3Int(v.x, v.y + 1, v.z),
+                new Vector3Int(v.x + 1, v.y, v.z),
+                new Vector3Int(v.x, v.y - 1, v.z),
+                new Vector3Int(v.x - 1, v.y - 1, v.z),
+                new Vector3Int(v.x - 1, v.y, v.z),
+                new Vector3Int(v.x - 1, v.y + 1, v.z)
+            };
+        }
+        else
+        {
+            // v is in an odd row
+            return new List<Vector3Int> {
+                new Vector3Int(v.x + 1, v.y + 1, v.z),
+                new Vector3Int(v.x + 1, v.y, v.z),
+                new Vector3Int(v.x + 1, v.y - 1, v.z),
+                new Vector3Int(v.x, v.y - 1, v.z),
+                new Vector3Int(v.x - 1, v.y, v.z),
+                new Vector3Int(v.x, v.y + 1, v.z)
+            };
         }
     }
 
