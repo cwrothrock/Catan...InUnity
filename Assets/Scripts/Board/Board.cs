@@ -31,7 +31,6 @@ public class Board : MonoBehaviour
                 List<Vector3Int> positions = board.GetDiceTiles()[diceRoll].Select(tile => tile.position).ToList();
                 valid &= !ContainsNeighbors(positions);
             });
-            // Debug.Log("Adjacent Numbers Rule: " + valid);
             return valid;
         }
     }
@@ -41,9 +40,8 @@ public class Board : MonoBehaviour
         public override bool Validate(Board board)
         {
             List<Vector3Int> positions = new();
-            positions.AddRange(board.GetDiceTiles()[6].Select(tile => tile.position).ToList());
-            positions.AddRange(board.GetDiceTiles()[8].Select(tile => tile.position).ToList());
-            // Debug.Log("Adjacent 6/8 Rule: " + !ContainsNeighbors(positions));
+            positions.AddRange(board.GetDiceTiles()[6].Select(tile => tile.position));
+            positions.AddRange(board.GetDiceTiles()[8].Select(tile => tile.position));
             return !ContainsNeighbors(positions);
         }
     }
@@ -119,7 +117,7 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<bool, string> boardRulesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
-
+    
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -130,7 +128,7 @@ public class Board : MonoBehaviour
     private void Start()
     {
         boardVariant = BoardVariant.From(boardVariantJsonAsset);
-
+        
         boardRules = new List<BoardRule>
         {
             new AdjacentNumbersRule(),
@@ -185,7 +183,7 @@ public class Board : MonoBehaviour
             {
                 AddPortTile(boardVariant.portPositions[i], portOrder[i]);
             }
-        } while (!Validate(this));
+        } while (!Validate(this)); 
         Debug.Log("Generated valid board in " + attempts + " attempts!");
     }
 
@@ -287,7 +285,7 @@ public class Board : MonoBehaviour
         {
             for (int j = i + 1; j < list.Count; j++)
             {
-                if (IsNeighbor(list[i], list[j]))
+                if (IsNeighbor(list[i], list[j])) 
                 {
                     return true;
                 }
