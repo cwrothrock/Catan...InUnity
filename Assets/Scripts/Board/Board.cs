@@ -114,7 +114,6 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<TileType, Tile> terrainTilesDict;
     [SerializeField] private SerializedDictionary<PortType, Tile> portTilesDict;
     [SerializeField] private SerializedDictionary<int, Tile> numberTilesDict;
-    [SerializeField] private SerializedDictionary<bool, string> boardRulesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
     
