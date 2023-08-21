@@ -4,11 +4,6 @@ using AYellowpaper.SerializedCollections;
 using System.Collections.Generic;
 using UnityEditor;
 using System.Linq;
-using Unity.Netcode;
-using System;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting;
-using UnityEngine.UIElements;
 
 public class Board : MonoBehaviour
 {
@@ -142,6 +137,7 @@ public class Board : MonoBehaviour
 
         GenerateBoard(boardVariant, boardRules);
         UpdateBoardUI();
+        UpdateBoardGraph();
     }
 
     private void GenerateBoard(BoardVariant boardVariant, List<BoardRule> boardRules)
@@ -216,6 +212,11 @@ public class Board : MonoBehaviour
         {
             portsTilemap.SetTile(tile.position, portTilesDict[tile.portType]);
         }
+    }
+
+    private void UpdateBoardGraph()
+    {
+
     }
 
     // Determine if two tile locations are neighbors ona tilemap
