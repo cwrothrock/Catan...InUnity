@@ -2,9 +2,45 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using AYellowpaper.SerializedCollections;
 using System.Collections.Generic;
+using UnityEditor;
+using System.Linq;
 
 public class Board : MonoBehaviour
 {
+    public abstract class BoardRule
+    {
+        public virtual bool Validate(Board board)
+        {
+            // Board configuration is valid
+            return true;
+        }
+    }
+
+    public class AdjacentNumbersRule : BoardRule
+    {
+        public override bool Validate(Board board)
+        {
+            bool valid = true;
+            board.GetDiceTiles().Keys.ToList().ForEach(diceRoll =>
+            {
+                List<Vector3Int> positions = board.GetDiceTiles()[diceRoll].Select(tile => tile.position).ToList();
+                valid &= !ContainsNeighbors(positions);
+            });
+            return valid;
+        }
+    }
+
+    public class Adjacent68Rule : BoardRule
+    {
+        public override bool Validate(Board board)
+        {
+            List<Vector3Int> positions = new();
+            positions.AddRange(board.GetDiceTiles()[6].Select(tile => tile.position));
+            positions.AddRange(board.GetDiceTiles()[8].Select(tile => tile.position));
+            return !ContainsNeighbors(positions);
+        }
+    }
+
     public enum TileType : int
     {
         WATER = 0,
@@ -75,14 +111,116 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<int, Tile> numberTilesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
+    
     private BoardVariant boardVariant;
-
-    private List<BoardTile> boardTiles = new List<BoardTile>();
-
+    private List<BoardRule> boardRules;
+    private List<TerrainTile> terrainTiles;
+    private List<PortTile> portTiles;
+    private Dictionary<int, List<TerrainTile>> diceTiles;
     private Graph graph;
 
+    private void Start()
+    {
+        boardVariant = BoardVariant.From(boardVariantJsonAsset);
+        
+        boardRules = new List<BoardRule>
+        {
+            new AdjacentNumbersRule(),
+            new Adjacent68Rule()
+        };
+
+        terrainTiles = new List<TerrainTile>();
+        portTiles = new List<PortTile>();
+        diceTiles = new Dictionary<int, List<TerrainTile>>();
+
+        graph = new Graph();
+
+        GenerateBoard(boardVariant, boardRules);
+        UpdateBoardUI();
+        UpdateBoardGraph();
+    }
+
+    private void GenerateBoard(BoardVariant boardVariant, List<BoardRule> boardRules)
+    {
+
+        List<TileType> terrainOrder = BoardVariant.Explode(boardVariant.terrainCounts, shuffle: false);
+        List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: false);
+        List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: false);
+
+        int attempts = 0;
+        do
+        {
+            attempts++;
+            terrainTiles.Clear();
+            portTiles.Clear();
+            diceTiles.Clear();
+            diceOrder.RemoveAll(dice => dice == 7);
+
+            BoardVariant.Shuffle(diceOrder);
+            BoardVariant.Shuffle(terrainOrder);
+            BoardVariant.Shuffle(portOrder);
+
+            // Add DESERT 7 rolls to maintain alignment
+            List<int> desertIndices = Enumerable.Range(0, terrainOrder.Count).Where(i => terrainOrder[i].Equals(TileType.DESERT)).ToList();
+            desertIndices.ForEach(index =>
+            {
+                diceOrder.Insert(index, 7);
+            });
+
+            // Add terrain tiles with dice rolls
+            for (int i = 0; i < terrainOrder.Count; i++)
+            {
+                AddTerrainTile(boardVariant.landPositions[i], terrainOrder[i], diceOrder[i]);
+            }
+
+            // Add port tiles
+            for (int i = 0; i < boardVariant.portPositions.Count; i++)
+            {
+                AddPortTile(boardVariant.portPositions[i], portOrder[i]);
+            }
+        } while (!Validate(this)); 
+        Debug.Log("Generated valid board in " + attempts + " attempts!");
+    }
+
+    private void AddTerrainTile(Vector3Int position, TileType type, int diceNumber)
+    {
+        terrainTiles.Add(new TerrainTile(position, type, diceNumber));
+        if (!diceTiles.ContainsKey(diceNumber))
+        {
+            diceTiles.Add(diceNumber, new List<TerrainTile>());
+        }
+        diceTiles[diceNumber].Add(terrainTiles.Last());
+    }
+
+    public void AddPortTile(Vector3Int position, PortType type)
+    {
+        portTiles.Add(new PortTile(position, type));
+    }
+
+    private void UpdateBoardUI()
+    {
+        foreach (TerrainTile tile in terrainTiles)
+        {
+            landTilemap.SetTile(tile.position, terrainTilesDict[TileType.LAND]);
+            terrainTilemap.SetTile(tile.position, terrainTilesDict[tile.tileType]);
+            if (!tile.tileType.Equals(TileType.DESERT))
+            {
+                numbersTilemap.SetTile(tile.position, numberTilesDict[tile.diceNumber]);
+            }
+        }
+        foreach (PortTile tile in portTiles)
+        {
+            portsTilemap.SetTile(tile.position, portTilesDict[tile.portType]);
+        }
+    }
+
+    private void UpdateBoardGraph()
+    {
+
+    }
+
     // Determine if two tile locations are neighbors ona tilemap
-    private bool IsNeighbor(Vector3Int v, Vector3Int w)
+    public static bool IsNeighbor(Vector3Int v, Vector3Int w)
     {
         // Return false if either x or y difference is greater than 1 (i.e. more than one tile away)
         if (Mathf.Abs(v.x - w.x) > 1 || Mathf.Abs(v.y - w.y) > 1)
@@ -141,51 +279,33 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void Start()
+    public static bool ContainsNeighbors(List<Vector3Int> list)
     {
-        // docksTilemap.CompressBounds();
-        // landTilemap.CompressBounds();
-
-        boardVariant = BoardVariant.From(boardVariantJsonAsset);
-        // boardVariant.portPositions = new();
-        // boardVariant.landPositions = new();
-
-        GenerateBoard();
+        for (int i = 0; i < list.Count; i++)
+        {
+            for (int j = i + 1; j < list.Count; j++)
+            {
+                if (IsNeighbor(list[i], list[j])) 
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    private void GenerateBoard()
+    public List<TerrainTile> GetTerrainTiles() => terrainTiles;
+    public List<PortTile> GetPortTiles() => portTiles;
+    public List<BoardRule> GetBoardRules() => boardRules;
+    public Dictionary<int, List<TerrainTile>> GetDiceTiles() => diceTiles;
+
+    public static bool Validate(Board board)
     {
-        List<TileType> terrainOrder = BoardVariant.Explode(boardVariant.terrainCounts, shuffle: true);
-        List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: true);
-        List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: true);
-
-        foreach (Vector3Int pos in boardVariant.landPositions)
+        bool result = true;
+        board.GetBoardRules().ForEach(rule =>
         {
-            landTilemap.SetTile(pos, terrainTilesDict[TileType.LAND]);
-
-            TerrainTile terrainTile = new TerrainTile(pos, terrainOrder[0]);
-            terrainOrder.RemoveAt(0);
-            terrainTilemap.SetTile(pos, terrainTilesDict[terrainTile.tileType]);
-
-            if (!terrainTile.tileType.Equals(TileType.DESERT))
-            {
-                terrainTile.diceNumber = diceOrder[0];
-                diceOrder.RemoveAt(0);
-                numbersTilemap.SetTile(pos, numberTilesDict[terrainTile.diceNumber]);
-            }
-
-            boardTiles.Add(terrainTile);
-            // boardVariant.landPositions.Add(pos);
-        }
-
-        foreach (Vector3Int pos in boardVariant.portPositions)
-        {
-            PortTile portTile = new PortTile(pos, portOrder[0]);
-            portOrder.RemoveAt(0);
-            portsTilemap.SetTile(pos, portTilesDict[portTile.portType]);
-
-            boardTiles.Add(portTile);
-            // boardVariant.portPositions.Add(pos);
-        }
+            result &= rule.Validate(board);
+        });
+        return result;
     }
 }
