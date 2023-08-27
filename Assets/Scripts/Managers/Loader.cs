@@ -1,18 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Loader : MonoBehaviour
+public static class Loader
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    public enum Scene {
+        MainMenuScene,
+        LobbyScene,
+        GameScene,
+        BoardEditorScene,
     }
 
-    // Update is called once per frame
-    void Update()
+    public static void Load(Scene targetScene)
     {
-        
+        SceneManager.LoadScene(targetScene.ToString());
+    }
+
+    public static void LoadNetwork(Scene targetScene)
+    {
+        NetworkManager.Singleton.SceneManager.LoadScene(targetScene.ToString(), LoadSceneMode.Single);
     }
 }
