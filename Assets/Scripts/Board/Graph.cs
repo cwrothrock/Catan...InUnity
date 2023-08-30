@@ -1,7 +1,7 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class Graph
 {
@@ -10,6 +10,16 @@ public class Graph
         None,
         Settlement,
         City,
+    }
+
+    public enum VertexDirection
+    {
+        North,
+        Northeast,
+        Southeast,
+        South,
+        Southwest,
+        Northwest,
     }
 
     public class Node
@@ -55,19 +65,23 @@ public class Graph
 
         public string GetOwner() { return owner; }
 
-        public void SetOwner(String owner) { this.owner = owner; }
+        public void SetOwner(string owner) { this.owner = owner; }
     }
 
     public class TileNode : Node
     {
-        private List<VertexNode> vertices = new();
+        private Dictionary<VertexDirection, VertexNode> vertices = new();
         private bool hasRobber = false;
 
         public TileNode() { }
 
-        public void AddVertex(VertexNode vertex) { vertices.Add(vertex); }
+        public void AddVertex(VertexDirection direction, VertexNode vertex) { vertices[direction] = vertex; }
 
-        public List<VertexNode> GetVertices() { return vertices; }
+        public Dictionary<VertexDirection, VertexNode> GetVertices() { return vertices; }
+
+        public VertexNode GetVertex(VertexDirection direction) { return vertices[direction]; }
+
+        public bool HasVertex(VertexDirection direction) { return vertices.ContainsKey(direction); }
 
         public bool HasRobber() { return hasRobber; }
 
@@ -80,13 +94,29 @@ public class Graph
 
     public Graph() { }
 
+    public static List<VertexDirection> GetVertexDirectionNeighbors(VertexDirection vertexDirection)
+    {
+        return vertexDirection switch
+        {
+            VertexDirection.North => new() { VertexDirection.Northwest, VertexDirection.Northeast },
+            VertexDirection.Northeast => new() { VertexDirection.North, VertexDirection.Southeast },
+            VertexDirection.Southeast => new() { VertexDirection.Northeast, VertexDirection.South },
+            VertexDirection.South => new() { VertexDirection.Southeast, VertexDirection.Southwest },
+            VertexDirection.Southwest => new() { VertexDirection.South, VertexDirection.Northwest },
+            VertexDirection.Northwest => new() { VertexDirection.Southwest, VertexDirection.North },
+            _ => new() { },
+        };
+    }
+
     public void AddVertex(VertexNode vertex) { vertices.Add(vertex); }
 
     public void AddEdge(EdgeNode edge) { edges.Add(edge); }
 
     public void AddTile(Vector3Int position, TileNode tile) { tiles[position] = tile; }
 
-    public TileNode GetTileAt(Vector3Int position) { return tiles[position]; }
+    public bool HasTile(Vector3Int position) { return tiles.ContainsKey(position); }
+
+    public TileNode GetTile(Vector3Int position) { return tiles[position]; }
 
     public List<VertexNode> GetVertices() { return vertices; }
 

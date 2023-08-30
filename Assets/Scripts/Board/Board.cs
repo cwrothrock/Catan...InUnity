@@ -1,9 +1,10 @@
+using AYellowpaper.SerializedCollections;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using AYellowpaper.SerializedCollections;
-using System.Collections.Generic;
-using UnityEditor;
-using System.Linq;
 
 public class Board : MonoBehaviour
 {
@@ -111,7 +112,7 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<int, Tile> numberTilesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
-    
+
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -122,7 +123,7 @@ public class Board : MonoBehaviour
     private void Start()
     {
         boardVariant = BoardVariant.From(boardVariantJsonAsset);
-        
+
         boardRules = new List<BoardRule>
         {
             new AdjacentNumbersRule(),
@@ -178,7 +179,7 @@ public class Board : MonoBehaviour
             {
                 AddPortTile(boardVariant.portPositions[i], portOrder[i]);
             }
-        } while (!Validate(this)); 
+        } while (!Validate(this));
         Debug.Log("Generated valid board in " + attempts + " attempts!");
     }
 
@@ -216,7 +217,66 @@ public class Board : MonoBehaviour
 
     private void UpdateBoardGraph()
     {
+        Dictionary<TileDirection, List<(Graph.VertexDirection, Graph.VertexDirection)>> vertexMappings = new() {
+            { TileDirection.Northwest, new() { ( Graph.VertexDirection.Northwest, Graph.VertexDirection.South ),
+                                            ( Graph.VertexDirection.North, Graph.VertexDirection.Southeast ) } },
+            { TileDirection.Northeast, new() { ( Graph.VertexDirection.North, Graph.VertexDirection.Southwest ),
+                                            ( Graph.VertexDirection.Northeast, Graph.VertexDirection.South ), } },
+            { TileDirection.West, new() { ( Graph.VertexDirection.Northwest, Graph.VertexDirection.Northeast ),
+                                        ( Graph.VertexDirection.Southwest, Graph.VertexDirection.Southeast ), } },
+            { TileDirection.East, new() { ( Graph.VertexDirection.Northeast, Graph.VertexDirection.Northwest ),
+                                        ( Graph.VertexDirection.Southeast, Graph.VertexDirection.Southwest ), } },
+            { TileDirection.Southwest, new() { ( Graph.VertexDirection.Southwest, Graph.VertexDirection.North ),
+                                            ( Graph.VertexDirection.South, Graph.VertexDirection.Northeast ), } },
+            { TileDirection.Southeast, new() { ( Graph.VertexDirection.Southeast, Graph.VertexDirection.North ),
+                                            ( Graph.VertexDirection.South, Graph.VertexDirection.Northwest ), } },
+        };
 
+        foreach (TerrainTile tile in terrainTiles)
+        {
+            Graph.TileNode tileNode = new();
+            // tileNode.SetWorldPosition()
+            Dictionary<TileDirection, Vector3Int> neighbors = GetNeighbors(tile.position);
+
+            // Set vertices if nieghboring tile already exists
+            foreach (var vertexMapping in vertexMappings)
+            {
+                if (graph.HasTile(neighbors[vertexMapping.Key]))
+                {
+                    Graph.TileNode neighbor = graph.GetTile(neighbors[vertexMapping.Key]);
+                    foreach (var map in vertexMapping.Value)
+                    {
+                        tileNode.AddVertex(map.Item1, neighbor.GetVertex(map.Item2));
+                    }
+                }
+            }
+            // else, create new vertex
+            foreach (Graph.VertexDirection direction in Enum.GetValues(typeof(Graph.VertexDirection)))
+            {
+                if (!tileNode.HasVertex(direction))
+                {
+                    Graph.VertexNode vertexNode = new();
+                    foreach (Graph.VertexDirection neighborVertex in Graph.GetVertexDirectionNeighbors(direction))
+                    {
+                        if (tileNode.HasVertex(neighborVertex))
+                        {
+                            Graph.VertexNode neighborVertexNode = tileNode.GetVertex(neighborVertex);
+                            Graph.EdgeNode edgeNode = new();
+                            edgeNode.AddVertex(vertexNode);
+                            edgeNode.AddVertex(neighborVertexNode);
+
+                            vertexNode.AddEdge(edgeNode);
+                            neighborVertexNode.AddEdge(edgeNode);
+
+                            graph.AddEdge(edgeNode);
+                        }
+                    }
+                    graph.AddVertex(vertexNode);
+                }
+            }
+
+            graph.AddTile(tile.position, tileNode);
+        }
     }
 
     // Determine if two tile locations are neighbors ona tilemap
@@ -244,37 +304,47 @@ public class Board : MonoBehaviour
         }
     }
 
+    private enum TileDirection
+    {
+        Northwest,
+        Northeast,
+        East,
+        Southeast,
+        Southwest,
+        West,
+    }
+
     // Return list of neighboring tile locations
-    private List<Vector3Int> GetNeighbors(Vector3Int v)
+    private Dictionary<TileDirection, Vector3Int> GetNeighbors(Vector3Int v)
     {
         if (v.y % 2 == 0)
         {
             // v is in an even row
-            return new List<Vector3Int> {
+            return new Dictionary<TileDirection, Vector3Int> {
                 // Row above
-                new Vector3Int(v.x - 1, v.y + 1, v.z),
-                new Vector3Int(v.x, v.y + 1, v.z),
+                { TileDirection.Northwest, new Vector3Int(v.x - 1, v.y + 1, v.z) },
+                { TileDirection.Northeast, new Vector3Int(v.x, v.y + 1, v.z) },
                 // Same row
-                new Vector3Int(v.x - 1, v.y, v.z),
-                new Vector3Int(v.x + 1, v.y, v.z),
+                { TileDirection.West, new Vector3Int(v.x - 1, v.y, v.z) },
+                { TileDirection.East, new Vector3Int(v.x + 1, v.y, v.z) },
                 // Row below
-                new Vector3Int(v.x - 1, v.y - 1, v.z),
-                new Vector3Int(v.x, v.y - 1, v.z),
+                { TileDirection.Southwest, new Vector3Int(v.x - 1, v.y - 1, v.z) },
+                { TileDirection.Southeast, new Vector3Int(v.x, v.y - 1, v.z) },
             };
         }
         else
         {
             // v is in an odd row
-            return new List<Vector3Int> {
+            return new Dictionary<TileDirection, Vector3Int> {
                 // Row above
-                new Vector3Int(v.x, v.y + 1, v.z),
-                new Vector3Int(v.x + 1, v.y + 1, v.z),
+                { TileDirection.Northwest, new Vector3Int(v.x, v.y + 1, v.z) },
+                { TileDirection.Northeast, new Vector3Int(v.x + 1, v.y + 1, v.z) },
                 // Same row
-                new Vector3Int(v.x - 1, v.y, v.z),
-                new Vector3Int(v.x + 1, v.y, v.z),
+                { TileDirection.West, new Vector3Int(v.x - 1, v.y, v.z) },
+                { TileDirection.East, new Vector3Int(v.x + 1, v.y, v.z) },
                 // Row below
-                new Vector3Int(v.x, v.y - 1, v.z),
-                new Vector3Int(v.x + 1, v.y - 1, v.z),
+                { TileDirection.Southwest, new Vector3Int(v.x, v.y - 1, v.z) },
+                { TileDirection.Southeast, new Vector3Int(v.x + 1, v.y - 1, v.z) },
             };
         }
     }
@@ -285,7 +355,7 @@ public class Board : MonoBehaviour
         {
             for (int j = i + 1; j < list.Count; j++)
             {
-                if (IsNeighbor(list[i], list[j])) 
+                if (IsNeighbor(list[i], list[j]))
                 {
                     return true;
                 }
