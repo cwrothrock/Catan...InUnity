@@ -456,6 +456,8 @@ MonoBehaviour:
     - Key: 0
       Value: {fileID: 0}
   boardVariantJsonAsset: {fileID: 4900000, guid: 6668da2868cbdea4986981ac2f369afe, type: 3}
+  testCircle: {fileID: 2800000, guid: bde87dcdf320fb140b85ca8aca81af75, type: 3}
+  graphLayer: {fileID: 1992540633}
 --- !u!1 &435197434
 GameObject:
   m_ObjectHideFlags: 0
@@ -837,6 +839,7 @@ Transform:
   - {fileID: 833346085}
   - {fileID: 657409982}
   - {fileID: 1736221812}
+  - {fileID: 1992540633}
   m_Father: {fileID: 429455594}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!156049354 &605396838
@@ -14255,6 +14258,50 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1992540632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1992540633}
+  - component: {fileID: 1992540634}
+  m_Layer: 0
+  m_Name: Graph
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1992540633
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1992540632}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 605396837}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!210 &1992540634
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1992540632}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 7
+  m_SortAtRoot: 0
 --- !u!1 &2067654887
 GameObject:
   m_ObjectHideFlags: 0

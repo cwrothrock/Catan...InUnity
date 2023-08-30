@@ -113,6 +113,11 @@ public class Board : MonoBehaviour
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
 
+    [SerializeField] private UnityEngine.Object vertexObject;
+    [SerializeField] private UnityEngine.Object edgeObject;
+    [SerializeField] private UnityEngine.Object tileObject;
+    [SerializeField] private Transform graphLayer;
+
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -139,6 +144,8 @@ public class Board : MonoBehaviour
         GenerateBoard(boardVariant, boardRules);
         UpdateBoardUI();
         UpdateBoardGraph();
+
+        TestGraphPoints();
     }
 
     private void GenerateBoard(BoardVariant boardVariant, List<BoardRule> boardRules)
@@ -234,8 +241,10 @@ public class Board : MonoBehaviour
 
         foreach (TerrainTile tile in terrainTiles)
         {
-            Graph.TileNode tileNode = new();
-            // tileNode.SetWorldPosition()
+            Vector3 tileWorldPosition = terrainTilemap.CellToWorld(tile.position);
+            Graph.TileNode tileNode = new(tileWorldPosition);
+            Debug.Log("Created TileNode at: " + tileWorldPosition);
+
             Dictionary<TileDirection, Vector3Int> neighbors = GetNeighbors(tile.position);
 
             // Set vertices if nieghboring tile already exists
@@ -255,13 +264,20 @@ public class Board : MonoBehaviour
             {
                 if (!tileNode.HasVertex(direction))
                 {
-                    Graph.VertexNode vertexNode = new();
-                    foreach (Graph.VertexDirection neighborVertex in Graph.GetVertexDirectionNeighbors(direction))
+                    Vector3 vertexWorldPosition = tileWorldPosition + Graph.GetVertexOffsetVector(direction);
+                    Graph.VertexNode vertexNode = new(vertexWorldPosition);
+                    Debug.Log("Created " + direction + " VertexNode at: " + vertexWorldPosition);
+
+                    foreach (Graph.VertexDirection neighborVertexDirection in Graph.GetVertexDirectionNeighbors(direction))
                     {
-                        if (tileNode.HasVertex(neighborVertex))
+                        if (tileNode.HasVertex(neighborVertexDirection))
                         {
-                            Graph.VertexNode neighborVertexNode = tileNode.GetVertex(neighborVertex);
-                            Graph.EdgeNode edgeNode = new();
+                            Graph.VertexNode neighborVertexNode = tileNode.GetVertex(neighborVertexDirection);
+
+                            Vector3 edgeWorldPosition = (vertexNode.GetWorldPosition() + neighborVertexNode.GetWorldPosition()) / 2;
+                            Graph.EdgeNode edgeNode = new(edgeWorldPosition);
+                            Debug.Log("Created EdgeNode at: " + edgeWorldPosition);
+
                             edgeNode.AddVertex(vertexNode);
                             edgeNode.AddVertex(neighborVertexNode);
 
@@ -271,11 +287,32 @@ public class Board : MonoBehaviour
                             graph.AddEdge(edgeNode);
                         }
                     }
+                    tileNode.AddVertex(direction, vertexNode);
                     graph.AddVertex(vertexNode);
                 }
             }
 
             graph.AddTile(tile.position, tileNode);
+        }
+
+        Debug.Log("# TileNodes: " + graph.GetTiles().Count);
+        Debug.Log("# VertexNodes: " + graph.GetVertices().Count);
+        Debug.Log("# EdgeNodes: " + graph.GetEdges().Count);
+    }
+
+    private void TestGraphPoints()
+    {
+        foreach (Graph.TileNode tile in graph.GetTiles())
+        {
+            Instantiate(tileObject, tile.GetWorldPosition(), Quaternion.identity, graphLayer);
+        }
+        foreach (Graph.VertexNode vertex in graph.GetVertices())
+        {
+            Instantiate(vertexObject, vertex.GetWorldPosition(), Quaternion.identity, graphLayer);
+        }
+        foreach (Graph.EdgeNode edge in graph.GetEdges())
+        {
+            Instantiate(edgeObject, edge.GetWorldPosition(), Quaternion.identity, graphLayer);
         }
     }
 

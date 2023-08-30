@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using UnityEngine;
 
 public class Graph
@@ -26,9 +27,11 @@ public class Graph
     {
         private Vector3 worldPosition;
 
-        public Vector3 GetWorldPosition() { return worldPosition; }
+        public Node(Vector3 worldPosition) { this.worldPosition = worldPosition; }
 
         public void SetWorldPosition(Vector3 worldPosition) { this.worldPosition = worldPosition; }
+
+        public Vector3 GetWorldPosition() => worldPosition;
     }
 
     public class VertexNode : Node
@@ -37,19 +40,19 @@ public class Graph
         private Building building = Building.None;
         private string owner;
 
-        public VertexNode() { }
+        public VertexNode(Vector3 worldPosition) : base(worldPosition) { }
 
         public void AddEdge(EdgeNode edge) { edges.Add(edge); }
 
-        public List<EdgeNode> GetEdges() { return edges; }
-
-        public Building GetBuilding() { return building; }
-
         public void SetBuilding(Building building) { this.building = building; }
 
-        public string GetOwner() { return owner; }
-
         public void SetOwner(string owner) { this.owner = owner; }
+
+        public List<EdgeNode> GetEdges() => edges;
+
+        public Building GetBuilding() => building;
+
+        public string GetOwner() => owner;
     }
 
     public class EdgeNode : Node
@@ -57,15 +60,15 @@ public class Graph
         private List<VertexNode> vertices = new();
         private string owner;
 
-        public EdgeNode() { }
+        public EdgeNode(Vector3 worldPosition) : base(worldPosition) { }
 
         public void AddVertex(VertexNode vertex) { vertices.Add(vertex); }
 
-        public List<VertexNode> GetVertices() { return vertices; }
-
-        public string GetOwner() { return owner; }
-
         public void SetOwner(string owner) { this.owner = owner; }
+
+        public List<VertexNode> GetVertices() => vertices;
+
+        public string GetOwner() => owner;
     }
 
     public class TileNode : Node
@@ -73,19 +76,19 @@ public class Graph
         private Dictionary<VertexDirection, VertexNode> vertices = new();
         private bool hasRobber = false;
 
-        public TileNode() { }
+        public TileNode(Vector3 worldPosition) : base(worldPosition) { }
 
         public void AddVertex(VertexDirection direction, VertexNode vertex) { vertices[direction] = vertex; }
 
-        public Dictionary<VertexDirection, VertexNode> GetVertices() { return vertices; }
-
-        public VertexNode GetVertex(VertexDirection direction) { return vertices[direction]; }
-
-        public bool HasVertex(VertexDirection direction) { return vertices.ContainsKey(direction); }
-
-        public bool HasRobber() { return hasRobber; }
-
         public void SetHasRobber(bool hasRobber) { this.hasRobber = hasRobber; }
+
+        public bool HasRobber() => hasRobber;
+
+        public bool HasVertex(VertexDirection direction) => vertices.ContainsKey(direction);
+
+        public VertexNode GetVertex(VertexDirection direction) => vertices[direction];
+
+        public Dictionary<VertexDirection, VertexNode> GetVertices() => vertices;
     }
 
     private List<VertexNode> vertices = new();
@@ -108,19 +111,33 @@ public class Graph
         };
     }
 
+    public static Vector3 GetVertexOffsetVector(VertexDirection vertexDirection)
+    {
+        return vertexDirection switch
+        {
+            VertexDirection.North => new Vector3(0, 1f / Mathf.Sqrt(3), 0),
+            VertexDirection.Northeast => new Vector3(1f / 2, 1f / (2 * Mathf.Sqrt(3)), 0),
+            VertexDirection.Southeast => new Vector3(1f / 2, -1f / (2 * Mathf.Sqrt(3)), 0),
+            VertexDirection.South => new Vector3(0, -1f / Mathf.Sqrt(3), 0),
+            VertexDirection.Northwest => new Vector3(-1f / 2, 1f / (2 * Mathf.Sqrt(3)), 0),
+            VertexDirection.Southwest => new Vector3(-1f / 2, -1f / (2 * Mathf.Sqrt(3)), 0),
+            _ => Vector3.zero,
+        };
+    }
+
     public void AddVertex(VertexNode vertex) { vertices.Add(vertex); }
 
     public void AddEdge(EdgeNode edge) { edges.Add(edge); }
 
     public void AddTile(Vector3Int position, TileNode tile) { tiles[position] = tile; }
 
-    public bool HasTile(Vector3Int position) { return tiles.ContainsKey(position); }
+    public bool HasTile(Vector3Int position) => tiles.ContainsKey(position);
 
-    public TileNode GetTile(Vector3Int position) { return tiles[position]; }
+    public TileNode GetTile(Vector3Int position) => tiles[position];
 
-    public List<VertexNode> GetVertices() { return vertices; }
+    public List<VertexNode> GetVertices() => vertices;
 
-    public List<EdgeNode> GetEdges() { return edges; }
+    public List<EdgeNode> GetEdges() => edges;
 
-    public List<TileNode> GetTiles() { return tiles.Values.ToList(); }
+    public List<TileNode> GetTiles() => tiles.Values.ToList();
 }
