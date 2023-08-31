@@ -1,9 +1,10 @@
+using AYellowpaper.SerializedCollections;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using AYellowpaper.SerializedCollections;
-using System.Collections.Generic;
-using UnityEditor;
-using System.Linq;
 
 public class Board : MonoBehaviour
 {
@@ -111,7 +112,7 @@ public class Board : MonoBehaviour
     [SerializeField] private SerializedDictionary<int, Tile> numberTilesDict;
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
-    
+
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -122,7 +123,7 @@ public class Board : MonoBehaviour
     private void Start()
     {
         boardVariant = BoardVariant.From(boardVariantJsonAsset);
-        
+
         boardRules = new List<BoardRule>
         {
             new AdjacentNumbersRule(),
@@ -178,7 +179,7 @@ public class Board : MonoBehaviour
             {
                 AddPortTile(boardVariant.portPositions[i], portOrder[i]);
             }
-        } while (!Validate(this)); 
+        } while (!Validate(this));
         Debug.Log("Generated valid board in " + attempts + " attempts!");
     }
 
@@ -216,67 +217,14 @@ public class Board : MonoBehaviour
 
     private void UpdateBoardGraph()
     {
+        List<(Vector3Int, Vector3)> tilePositions = new();
 
-    }
+        foreach (TerrainTile tile in terrainTiles)
+        {
+            tilePositions.Add((tile.position, terrainTilemap.CellToWorld(tile.position)));
+        }
 
-    // Determine if two tile locations are neighbors ona tilemap
-    public static bool IsNeighbor(Vector3Int v, Vector3Int w)
-    {
-        // Return false if either x or y difference is greater than 1 (i.e. more than one tile away)
-        if (Mathf.Abs(v.x - w.x) > 1 || Mathf.Abs(v.y - w.y) > 1)
-        {
-            return false;
-        }
-        // x value difference is either 0 or 1. If y values are the same, they are on the same row, and therefore neighbors
-        if (v.y == w.y)
-        {
-            return true;
-        }
-        if (v.y % 2 == 0)
-        {
-            // v is in even row
-            return w.x <= v.x;
-        }
-        else
-        {
-            // v is in odd row
-            return w.x >= v.x;
-        }
-    }
-
-    // Return list of neighboring tile locations
-    private List<Vector3Int> GetNeighbors(Vector3Int v)
-    {
-        if (v.y % 2 == 0)
-        {
-            // v is in an even row
-            return new List<Vector3Int> {
-                // Row above
-                new Vector3Int(v.x - 1, v.y + 1, v.z),
-                new Vector3Int(v.x, v.y + 1, v.z),
-                // Same row
-                new Vector3Int(v.x - 1, v.y, v.z),
-                new Vector3Int(v.x + 1, v.y, v.z),
-                // Row below
-                new Vector3Int(v.x - 1, v.y - 1, v.z),
-                new Vector3Int(v.x, v.y - 1, v.z),
-            };
-        }
-        else
-        {
-            // v is in an odd row
-            return new List<Vector3Int> {
-                // Row above
-                new Vector3Int(v.x, v.y + 1, v.z),
-                new Vector3Int(v.x + 1, v.y + 1, v.z),
-                // Same row
-                new Vector3Int(v.x - 1, v.y, v.z),
-                new Vector3Int(v.x + 1, v.y, v.z),
-                // Row below
-                new Vector3Int(v.x, v.y - 1, v.z),
-                new Vector3Int(v.x + 1, v.y - 1, v.z),
-            };
-        }
+        graph.GenerateGraph(tilePositions);
     }
 
     public static bool ContainsNeighbors(List<Vector3Int> list)
@@ -285,7 +233,7 @@ public class Board : MonoBehaviour
         {
             for (int j = i + 1; j < list.Count; j++)
             {
-                if (IsNeighbor(list[i], list[j])) 
+                if (Graph.IsNeighbor(list[i], list[j]))
                 {
                     return true;
                 }
