@@ -113,11 +113,6 @@ public class Board : MonoBehaviour
 
     [SerializeField] private TextAsset boardVariantJsonAsset;
 
-    [SerializeField] private UnityEngine.Object vertexObject;
-    [SerializeField] private UnityEngine.Object edgeObject;
-    [SerializeField] private UnityEngine.Object tileObject;
-    [SerializeField] private Transform graphLayer;
-
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
     private List<TerrainTile> terrainTiles;
@@ -144,8 +139,6 @@ public class Board : MonoBehaviour
         GenerateBoard(boardVariant, boardRules);
         UpdateBoardUI();
         UpdateBoardGraph();
-
-        TestGraphPoints();
     }
 
     private void GenerateBoard(BoardVariant boardVariant, List<BoardRule> boardRules)
@@ -224,166 +217,14 @@ public class Board : MonoBehaviour
 
     private void UpdateBoardGraph()
     {
-        Dictionary<TileDirection, List<(Graph.VertexDirection, Graph.VertexDirection)>> vertexMappings = new() {
-            { TileDirection.Northwest, new() { ( Graph.VertexDirection.Northwest, Graph.VertexDirection.South ),
-                                            ( Graph.VertexDirection.North, Graph.VertexDirection.Southeast ) } },
-            { TileDirection.Northeast, new() { ( Graph.VertexDirection.North, Graph.VertexDirection.Southwest ),
-                                            ( Graph.VertexDirection.Northeast, Graph.VertexDirection.South ), } },
-            { TileDirection.West, new() { ( Graph.VertexDirection.Northwest, Graph.VertexDirection.Northeast ),
-                                        ( Graph.VertexDirection.Southwest, Graph.VertexDirection.Southeast ), } },
-            { TileDirection.East, new() { ( Graph.VertexDirection.Northeast, Graph.VertexDirection.Northwest ),
-                                        ( Graph.VertexDirection.Southeast, Graph.VertexDirection.Southwest ), } },
-            { TileDirection.Southwest, new() { ( Graph.VertexDirection.Southwest, Graph.VertexDirection.North ),
-                                            ( Graph.VertexDirection.South, Graph.VertexDirection.Northeast ), } },
-            { TileDirection.Southeast, new() { ( Graph.VertexDirection.Southeast, Graph.VertexDirection.North ),
-                                            ( Graph.VertexDirection.South, Graph.VertexDirection.Northwest ), } },
-        };
+        List<(Vector3Int, Vector3)> tilePositions = new();
 
         foreach (TerrainTile tile in terrainTiles)
         {
-            Vector3 tileWorldPosition = terrainTilemap.CellToWorld(tile.position);
-            Graph.TileNode tileNode = new(tileWorldPosition);
-            Debug.Log("Created TileNode at: " + tileWorldPosition);
-
-            Dictionary<TileDirection, Vector3Int> neighbors = GetNeighbors(tile.position);
-
-            // Set vertices if nieghboring tile already exists
-            foreach (var vertexMapping in vertexMappings)
-            {
-                if (graph.HasTile(neighbors[vertexMapping.Key]))
-                {
-                    Graph.TileNode neighbor = graph.GetTile(neighbors[vertexMapping.Key]);
-                    foreach (var map in vertexMapping.Value)
-                    {
-                        tileNode.AddVertex(map.Item1, neighbor.GetVertex(map.Item2));
-                    }
-                }
-            }
-            // else, create new vertex
-            foreach (Graph.VertexDirection direction in Enum.GetValues(typeof(Graph.VertexDirection)))
-            {
-                if (!tileNode.HasVertex(direction))
-                {
-                    Vector3 vertexWorldPosition = tileWorldPosition + Graph.GetVertexOffsetVector(direction);
-                    Graph.VertexNode vertexNode = new(vertexWorldPosition);
-                    Debug.Log("Created " + direction + " VertexNode at: " + vertexWorldPosition);
-
-                    foreach (Graph.VertexDirection neighborVertexDirection in Graph.GetVertexDirectionNeighbors(direction))
-                    {
-                        if (tileNode.HasVertex(neighborVertexDirection))
-                        {
-                            Graph.VertexNode neighborVertexNode = tileNode.GetVertex(neighborVertexDirection);
-
-                            Vector3 edgeWorldPosition = (vertexNode.GetWorldPosition() + neighborVertexNode.GetWorldPosition()) / 2;
-                            Graph.EdgeNode edgeNode = new(edgeWorldPosition);
-                            Debug.Log("Created EdgeNode at: " + edgeWorldPosition);
-
-                            edgeNode.AddVertex(vertexNode);
-                            edgeNode.AddVertex(neighborVertexNode);
-
-                            vertexNode.AddEdge(edgeNode);
-                            neighborVertexNode.AddEdge(edgeNode);
-
-                            graph.AddEdge(edgeNode);
-                        }
-                    }
-                    tileNode.AddVertex(direction, vertexNode);
-                    graph.AddVertex(vertexNode);
-                }
-            }
-
-            graph.AddTile(tile.position, tileNode);
+            tilePositions.Add((tile.position, terrainTilemap.CellToWorld(tile.position)));
         }
 
-        Debug.Log("# TileNodes: " + graph.GetTiles().Count);
-        Debug.Log("# VertexNodes: " + graph.GetVertices().Count);
-        Debug.Log("# EdgeNodes: " + graph.GetEdges().Count);
-    }
-
-    private void TestGraphPoints()
-    {
-        foreach (Graph.TileNode tile in graph.GetTiles())
-        {
-            Instantiate(tileObject, tile.GetWorldPosition(), Quaternion.identity, graphLayer);
-        }
-        foreach (Graph.VertexNode vertex in graph.GetVertices())
-        {
-            Instantiate(vertexObject, vertex.GetWorldPosition(), Quaternion.identity, graphLayer);
-        }
-        foreach (Graph.EdgeNode edge in graph.GetEdges())
-        {
-            Instantiate(edgeObject, edge.GetWorldPosition(), Quaternion.identity, graphLayer);
-        }
-    }
-
-    // Determine if two tile locations are neighbors ona tilemap
-    public static bool IsNeighbor(Vector3Int v, Vector3Int w)
-    {
-        // Return false if either x or y difference is greater than 1 (i.e. more than one tile away)
-        if (Mathf.Abs(v.x - w.x) > 1 || Mathf.Abs(v.y - w.y) > 1)
-        {
-            return false;
-        }
-        // x value difference is either 0 or 1. If y values are the same, they are on the same row, and therefore neighbors
-        if (v.y == w.y)
-        {
-            return true;
-        }
-        if (v.y % 2 == 0)
-        {
-            // v is in even row
-            return w.x <= v.x;
-        }
-        else
-        {
-            // v is in odd row
-            return w.x >= v.x;
-        }
-    }
-
-    private enum TileDirection
-    {
-        Northwest,
-        Northeast,
-        East,
-        Southeast,
-        Southwest,
-        West,
-    }
-
-    // Return list of neighboring tile locations
-    private Dictionary<TileDirection, Vector3Int> GetNeighbors(Vector3Int v)
-    {
-        if (v.y % 2 == 0)
-        {
-            // v is in an even row
-            return new Dictionary<TileDirection, Vector3Int> {
-                // Row above
-                { TileDirection.Northwest, new Vector3Int(v.x - 1, v.y + 1, v.z) },
-                { TileDirection.Northeast, new Vector3Int(v.x, v.y + 1, v.z) },
-                // Same row
-                { TileDirection.West, new Vector3Int(v.x - 1, v.y, v.z) },
-                { TileDirection.East, new Vector3Int(v.x + 1, v.y, v.z) },
-                // Row below
-                { TileDirection.Southwest, new Vector3Int(v.x - 1, v.y - 1, v.z) },
-                { TileDirection.Southeast, new Vector3Int(v.x, v.y - 1, v.z) },
-            };
-        }
-        else
-        {
-            // v is in an odd row
-            return new Dictionary<TileDirection, Vector3Int> {
-                // Row above
-                { TileDirection.Northwest, new Vector3Int(v.x, v.y + 1, v.z) },
-                { TileDirection.Northeast, new Vector3Int(v.x + 1, v.y + 1, v.z) },
-                // Same row
-                { TileDirection.West, new Vector3Int(v.x - 1, v.y, v.z) },
-                { TileDirection.East, new Vector3Int(v.x + 1, v.y, v.z) },
-                // Row below
-                { TileDirection.Southwest, new Vector3Int(v.x, v.y - 1, v.z) },
-                { TileDirection.Southeast, new Vector3Int(v.x + 1, v.y - 1, v.z) },
-            };
-        }
+        graph.GenerateGraph(tilePositions);
     }
 
     public static bool ContainsNeighbors(List<Vector3Int> list)
@@ -392,7 +233,7 @@ public class Board : MonoBehaviour
         {
             for (int j = i + 1; j < list.Count; j++)
             {
-                if (IsNeighbor(list[i], list[j]))
+                if (Graph.IsNeighbor(list[i], list[j]))
                 {
                     return true;
                 }
