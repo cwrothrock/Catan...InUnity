@@ -392,31 +392,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f4327778f89fef49bbc0a508e2347b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waterTilemap: {fileID: 0}
   landTilemap: {fileID: 782112315}
   terrainTilemap: {fileID: 1573324706}
   docksTilemap: {fileID: 1204637156}
   portsTilemap: {fileID: 1881139045}
   numbersTilemap: {fileID: 833346087}
-  terrainTilesDict:
+  baseTilesDict:
     _serializedList:
     - Key: 0
       Value: {fileID: 11400000, guid: 31e891b01bf324a45b5ea820338220d7, type: 2}
-    - Key: 8
-      Value: {fileID: 11400000, guid: bf41022c2773ea349a52af413bd50dd3, type: 2}
     - Key: 1
+      Value: {fileID: 11400000, guid: bf41022c2773ea349a52af413bd50dd3, type: 2}
+  terrainTilesDict:
+    _serializedList:
+    - Key: 0
       Value: {fileID: 11400000, guid: 54c317d3d52fe7848988ffa7d88d7d47, type: 2}
-    - Key: 2
+    - Key: 1
       Value: {fileID: 11400000, guid: b78f4e3061114054498bd2a5695b7db6, type: 2}
-    - Key: 3
+    - Key: 2
       Value: {fileID: 11400000, guid: 0836d74e58259c54a8d3dddb30d12d4c, type: 2}
-    - Key: 4
+    - Key: 3
       Value: {fileID: 11400000, guid: e9576aab367198f49a29e6c63d17b72a, type: 2}
-    - Key: 5
+    - Key: 4
       Value: {fileID: 11400000, guid: 5e3df7711f65e54479c0b7bce5f91d25, type: 2}
-    - Key: 6
+    - Key: 5
       Value: {fileID: 11400000, guid: 47cf1bd0c2baaf64dae34b959673411b, type: 2}
-    - Key: 7
-      Value: {fileID: 11400000, guid: 31e891b01bf324a45b5ea820338220d7, type: 2}
   portTilesDict:
     _serializedList:
     - Key: 1
@@ -792,6 +793,7 @@ RectTransform:
   - {fileID: 435197435}
   - {fileID: 620405603}
   - {fileID: 907836854}
+  - {fileID: 743877760}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1025,6 +1027,41 @@ SortingGroup:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_SortAtRoot: 0
+--- !u!1 &743877759
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 743877760}
+  m_Layer: 5
+  m_Name: GameUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &743877760
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 743877759}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 600261018}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &782112312
 GameObject:
   m_ObjectHideFlags: 0

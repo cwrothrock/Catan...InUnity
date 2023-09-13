@@ -13,8 +13,8 @@ public class BoardVariant
 
     public Dictionary<int, int> diceCounts;
     public Dictionary<Board.PortType, int> portCounts;
-    public Dictionary<Board.TileType, int> terrainCounts;
-    public Dictionary<Board.TileType, int> cardCounts;
+    public Dictionary<Board.TerrainType, int> terrainCounts;
+    public Dictionary<Board.TerrainType, int> cardCounts;
     public Dictionary<string, int> devCounts;
     public Dictionary<string, int> buildingCounts;
     public List<Vector3Int> landPositions;

@@ -2,57 +2,29 @@ using AYellowpaper.SerializedCollections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class Board : MonoBehaviour
 {
-    public abstract class BoardRule
-    {
-        public virtual bool Validate(Board board)
-        {
-            // Board configuration is valid
-            return true;
-        }
-    }
-
-    public class AdjacentNumbersRule : BoardRule
-    {
-        public override bool Validate(Board board)
-        {
-            bool valid = true;
-            board.GetDiceTiles().Keys.ToList().ForEach(diceRoll =>
-            {
-                List<Vector3Int> positions = board.GetDiceTiles()[diceRoll].Select(tile => tile.position).ToList();
-                valid &= !ContainsNeighbors(positions);
-            });
-            return valid;
-        }
-    }
-
-    public class Adjacent68Rule : BoardRule
-    {
-        public override bool Validate(Board board)
-        {
-            List<Vector3Int> positions = new();
-            positions.AddRange(board.GetDiceTiles()[6].Select(tile => tile.position));
-            positions.AddRange(board.GetDiceTiles()[8].Select(tile => tile.position));
-            return !ContainsNeighbors(positions);
-        }
-    }
-
     public enum TileType : int
     {
         WATER = 0,
-        DESERT = 1,
-        BRICK = 2,
-        ORE = 3,
-        SHEEP = 4,
-        WHEAT = 5,
-        WOOD = 6,
-        PORT = 7,
-        LAND = 8,
+        LAND = 1,
+        PORT = 2,
+    }
+
+    public enum TerrainType : int
+    {
+        DESERT = 0,
+        BRICK = 1,
+        ORE = 2,
+        SHEEP = 3,
+        WHEAT = 4,
+        WOOD = 5,
     }
 
     public enum PortType : int
@@ -81,6 +53,18 @@ public class Board : MonoBehaviour
         }
     }
 
+    public class TerrainTile : BoardTile
+    {
+        public int diceNumber;
+        public TerrainType terrainType;
+        public TerrainTile(Vector3Int position, TerrainType terrainType, int diceNumber = 0)
+        : base(position, TileType.LAND)
+        {
+            this.diceNumber = diceNumber;
+            this.terrainType = terrainType;
+        }
+    }
+
     public class PortTile : BoardTile
     {
         public PortType portType;
@@ -91,39 +75,39 @@ public class Board : MonoBehaviour
         }
     }
 
-    public class TerrainTile : BoardTile
-    {
-        public int diceNumber;
-        public TerrainTile(Vector3Int position, TileType tileType, int diceNumber = 0)
-        : base(position, tileType)
-        {
-            this.diceNumber = diceNumber;
-        }
-    }
-
+    // UI Components
+    [SerializeField] private Tilemap waterTilemap;
     [SerializeField] private Tilemap landTilemap;
     [SerializeField] private Tilemap terrainTilemap;
     [SerializeField] private Tilemap docksTilemap;
     [SerializeField] private Tilemap portsTilemap;
     [SerializeField] private Tilemap numbersTilemap;
-
-    [SerializeField] private SerializedDictionary<TileType, Tile> terrainTilesDict;
+    [SerializeField] private SerializedDictionary<TileType, Tile> baseTilesDict;
+    [SerializeField] private SerializedDictionary<TerrainType, Tile> terrainTilesDict;
     [SerializeField] private SerializedDictionary<PortType, Tile> portTilesDict;
     [SerializeField] private SerializedDictionary<int, Tile> numberTilesDict;
 
+    // Board
     [SerializeField] private TextAsset boardVariantJsonAsset;
-
     private BoardVariant boardVariant;
     private List<BoardRule> boardRules;
+    private HexGraph graph;
+
     private List<TerrainTile> terrainTiles;
     private List<PortTile> portTiles;
     private Dictionary<int, List<TerrainTile>> diceTiles;
-    private Graph graph;
 
     private void Start()
     {
-        boardVariant = BoardVariant.From(boardVariantJsonAsset);
+        GenerateBoard();
+        GenerateGraph();
+        UpdateUI();
+    }
 
+    private void GenerateBoard()
+    {
+        boardVariant = BoardVariant.From(boardVariantJsonAsset);
+        
         boardRules = new List<BoardRule>
         {
             new AdjacentNumbersRule(),
@@ -134,17 +118,7 @@ public class Board : MonoBehaviour
         portTiles = new List<PortTile>();
         diceTiles = new Dictionary<int, List<TerrainTile>>();
 
-        graph = new Graph();
-
-        GenerateBoard(boardVariant, boardRules);
-        UpdateBoardUI();
-        UpdateBoardGraph();
-    }
-
-    private void GenerateBoard(BoardVariant boardVariant, List<BoardRule> boardRules)
-    {
-
-        List<TileType> terrainOrder = BoardVariant.Explode(boardVariant.terrainCounts, shuffle: false);
+        List<TerrainType> terrainOrder = BoardVariant.Explode(boardVariant.terrainCounts, shuffle: false);
         List<PortType> portOrder = BoardVariant.Explode(boardVariant.portCounts, shuffle: false);
         List<int> diceOrder = BoardVariant.Explode(boardVariant.diceCounts, shuffle: false);
 
@@ -152,9 +126,11 @@ public class Board : MonoBehaviour
         do
         {
             attempts++;
+
             terrainTiles.Clear();
             portTiles.Clear();
             diceTiles.Clear();
+            
             diceOrder.RemoveAll(dice => dice == 7);
 
             BoardVariant.Shuffle(diceOrder);
@@ -162,7 +138,7 @@ public class Board : MonoBehaviour
             BoardVariant.Shuffle(portOrder);
 
             // Add DESERT 7 rolls to maintain alignment
-            List<int> desertIndices = Enumerable.Range(0, terrainOrder.Count).Where(i => terrainOrder[i].Equals(TileType.DESERT)).ToList();
+            List<int> desertIndices = Enumerable.Range(0, terrainOrder.Count).Where(i => terrainOrder[i].Equals(TerrainType.DESERT)).ToList();
             desertIndices.ForEach(index =>
             {
                 diceOrder.Insert(index, 7);
@@ -183,7 +159,7 @@ public class Board : MonoBehaviour
         Debug.Log("Generated valid board in " + attempts + " attempts!");
     }
 
-    private void AddTerrainTile(Vector3Int position, TileType type, int diceNumber)
+    private void AddTerrainTile(Vector3Int position, TerrainType type, int diceNumber)
     {
         terrainTiles.Add(new TerrainTile(position, type, diceNumber));
         if (!diceTiles.ContainsKey(diceNumber))
@@ -198,13 +174,27 @@ public class Board : MonoBehaviour
         portTiles.Add(new PortTile(position, type));
     }
 
-    private void UpdateBoardUI()
+
+    private void GenerateGraph()
+    {
+        List<HexGraph.HexPosition> tilePositions = new();
+
+        foreach (TerrainTile tile in terrainTiles)
+        {
+            tilePositions.Add(new HexGraph.HexPosition(tile.position, terrainTilemap.CellToWorld(tile.position)));
+        }
+
+        graph = new HexGraph(tilePositions);
+
+        
+    }
+    private void UpdateUI()
     {
         foreach (TerrainTile tile in terrainTiles)
         {
-            landTilemap.SetTile(tile.position, terrainTilesDict[TileType.LAND]);
-            terrainTilemap.SetTile(tile.position, terrainTilesDict[tile.tileType]);
-            if (!tile.tileType.Equals(TileType.DESERT))
+            landTilemap.SetTile(tile.position, baseTilesDict[TileType.LAND]);
+            terrainTilemap.SetTile(tile.position, terrainTilesDict[tile.terrainType]);
+            if (!tile.terrainType.Equals(TerrainType.DESERT))
             {
                 numbersTilemap.SetTile(tile.position, numberTilesDict[tile.diceNumber]);
             }
@@ -213,33 +203,6 @@ public class Board : MonoBehaviour
         {
             portsTilemap.SetTile(tile.position, portTilesDict[tile.portType]);
         }
-    }
-
-    private void UpdateBoardGraph()
-    {
-        List<(Vector3Int, Vector3)> tilePositions = new();
-
-        foreach (TerrainTile tile in terrainTiles)
-        {
-            tilePositions.Add((tile.position, terrainTilemap.CellToWorld(tile.position)));
-        }
-
-        graph.GenerateGraph(tilePositions);
-    }
-
-    public static bool ContainsNeighbors(List<Vector3Int> list)
-    {
-        for (int i = 0; i < list.Count; i++)
-        {
-            for (int j = i + 1; j < list.Count; j++)
-            {
-                if (Graph.IsNeighbor(list[i], list[j]))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public List<TerrainTile> GetTerrainTiles() => terrainTiles;

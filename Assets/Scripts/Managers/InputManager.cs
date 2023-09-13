@@ -2,6 +2,7 @@ using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class InputManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class InputManager : MonoBehaviour
     private InputActions inputActions;
 
     public event EventHandler OnClickAction;
+    public event EventHandler OnClickEmptyAction;
     
     // Camera Controls
     public event EventHandler OnDragAction;
@@ -44,7 +46,14 @@ public class InputManager : MonoBehaviour
 
     private void Click_performed(InputAction.CallbackContext ctx)
     {
+
         OnClickAction?.Invoke(this, EventArgs.Empty);
+        
+        var rayHit = Physics2D.GetRayIntersection(Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue()));
+        if (!rayHit.collider)
+        {
+            OnClickEmptyAction?.Invoke(this, EventArgs.Empty);
+        }
     }
 
 
