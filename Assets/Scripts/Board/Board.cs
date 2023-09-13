@@ -177,17 +177,16 @@ public class Board : MonoBehaviour
 
     private void GenerateGraph()
     {
-        List<HexGraph.HexPosition> tilePositions = new();
+        List<HexGraph.Position> tilePositions = new();
 
         foreach (TerrainTile tile in terrainTiles)
         {
-            tilePositions.Add(new HexGraph.HexPosition(tile.position, terrainTilemap.CellToWorld(tile.position)));
+            tilePositions.Add(new HexGraph.Position(tile.position, terrainTilemap.CellToWorld(tile.position)));
         }
 
-        graph = new HexGraph(tilePositions);
-
-        
+        graph = new HexGraph(tilePositions, landTilemap.cellSize);
     }
+
     private void UpdateUI()
     {
         foreach (TerrainTile tile in terrainTiles)
